@@ -17,12 +17,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
+@ActiveProfiles("test")
 @SpringBootTest
 class ItemServiceTest {
 
