@@ -1,5 +1,6 @@
 package com.example.market.controller.user;
 
+import com.example.market.ControllerTestSupport;
 import com.example.market.domain.entity.Comment;
 import com.example.market.domain.entity.user.Address;
 import com.example.market.domain.entity.user.User;
@@ -15,10 +16,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,79 +38,81 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@ExtendWith({RestDocumentationExtension.class})
-@SpringBootTest
-@Transactional
-class UserControllerTest {
+class UserControllerTest extends ControllerTestSupport {
 
-    @Autowired
-    private WebApplicationContext context;
-    private MockMvc mvc;
 
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    CommentRepository commentRepository;
-
-    @Autowired
-    ItemRepository itemRepository;
-
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    @BeforeEach
-    void setUp(RestDocumentationContextProvider restDocumentation) {
-        userRepository.deleteAll();
-
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(documentationConfiguration(restDocumentation)
-                        .operationPreprocessors()
-                        .withRequestDefaults(prettyPrint())
-                        .withResponseDefaults(prettyPrint()))
-                .build();
-    }
-
-    @DisplayName("회원가입 API 테스트")
+    @DisplayName("회원가입 테스트 신규 회원을 등록한다.")
     @Test
+    @WithMockUser
     void createUser() throws Exception {
         // given
-        UserCreateRequestDto createDto = UserCreateRequestDto.builder()
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
                 .username("아이디")
                 .password("비밀번호")
-                .email("이메일")
-                .userImage("사진")
-                .nickname("닉네임")
-                .phoneNumber("번호")
-                .address(new Address("city", "street", "zipcode"))
                 .build();
-        String url = "http://localhost:8080/join";
 
-        // when
-        ResultActions perform = mvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createDto)));
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("OK"));
+    }
 
-        // then
-        perform.andExpect(status().isOk())
-                .andDo(document("/join",
-                        requestFields(
-                                fieldWithPath("username").description("계정"),
-                                fieldWithPath("password").description("비밀번호"),
-                                fieldWithPath("email").description("이메일"),
-                                fieldWithPath("userImage").description("사진"),
-                                fieldWithPath("nickname").description("닉네임"),
-                                fieldWithPath("phoneNumber").description("번호"),
-                                fieldWithPath("address.city").description("city"),
-                                fieldWithPath("address.street").description("street"),
-                                fieldWithPath("address.zipcode").description("zipcode")
-                        )));
+    @DisplayName("회원가입할 때 아이디는 꼭 입력해야 한다.")
+    @Test
+    @WithMockUser
+    void createUserWithEmptyUsername() throws Exception {
+        // given
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
+//                .username("아이디")
+                .password("비밀번호")
+                .build();
 
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("아이디는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원가입할 때 비밀번호는 꼭 입력해야 한다.")
+    @Test
+    @WithMockUser
+    void createUserWithEmptyPassword() throws Exception {
+        // given
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
+                .username("아이디")
+//                .password("비밀번호")
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("비밀번호는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 }
