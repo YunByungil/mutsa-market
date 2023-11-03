@@ -12,10 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class UserCreateRequestDto {
-    @NotBlank
+    @NotBlank(message = "아이디는 필수로 입력해야 됩니다.")
     private String username;
-    @NotBlank
+
+    @NotBlank(message = "비밀번호는 필수로 입력해야 됩니다.")
     private String password;
+
     private String phoneNumber;
     private String email;
     private String nickname;
