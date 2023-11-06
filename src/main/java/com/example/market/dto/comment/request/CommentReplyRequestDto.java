@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CommentReplyRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "답글 내용은 필수입니다.")
     private String reply;
 
     @Builder
