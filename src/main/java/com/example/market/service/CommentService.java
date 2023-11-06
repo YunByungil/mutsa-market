@@ -55,7 +55,6 @@ public class CommentService {
 
         Page<Comment> findCommentByAllItemId = commentRepository.findAllByItemId(itemId, pageable);
 
-//        Page<CommentListResponseDto> commentListResponseDto = findCommentByAllItemId.map(CommentListResponseDto::new);
         Page<CommentResponse> commentListResponseDto = findCommentByAllItemId.map(CommentResponse::of);
 
         return commentListResponseDto;
