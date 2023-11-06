@@ -1,58 +1,63 @@
-#spring:
-#  profiles:
-#    default: local
-#  #  sql:
-##    init:
-##      mode: always
-#  datasource:
-#    url: jdbc:h2:mem:~/market;
-#    username: sa
-#    password:
-#    driver-class-name: org.h2.Driver
-#
-#  jpa:
-##    defer-datasource-initialization: true
-#    hibernate:
-#      ddl-auto: none
-#    properties:
-#      hibernate:
-#        show_sql: true
-#        format_sql: true
-#        default_batch_fetch_size: 1000
-#    open-in-view: false
-#
 spring:
   profiles:
     default: local
-
+  #  sql:
+#    init:
+#      mode: always
   datasource:
-    url: jdbc:h2:mem:~/market
-    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:~/market;
     username: sa
     password:
+    driver-class-name: org.h2.Driver
 
   jpa:
-    hibernate:
-      ddl-auto: none
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
-
-  jpa:
+#    defer-datasource-initialization: true
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show_sql: true
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
-
-  h2:
-    console:
-      enabled: true
+        default_batch_fetch_size: 1000
+    open-in-view: false
+#
+#spring:
+#  profiles:
+#    default: local
+#
+#  datasource:
+#    url: jdbc:h2:mem:~/market;
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: local
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+#    defer-datasource-initialization: true
+##        default_batch_fetch_size: 1000
+##    open-in-view: false
+#
+#  h2:
+#    console:
+#      enabled: true
+#
+jwt:
+  secret: aaaabbbsdifqbvaesoioegwaaaabbbsdidsfdsfdfsdfsdfsdfsdfsd
 
 ---
 spring:

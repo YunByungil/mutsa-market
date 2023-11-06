@@ -8,6 +8,7 @@ import com.example.market.dto.comment.request.CommentCreateRequestDto;
 import com.example.market.dto.comment.request.CommentReplyRequestDto;
 import com.example.market.dto.comment.request.CommentUpdateRequestDto;
 import com.example.market.dto.comment.response.CommentListResponseDto;
+import com.example.market.dto.comment.response.CommentResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.CommentRepository;
 import com.example.market.repository.ItemRepository;
@@ -128,7 +129,8 @@ class CommentServiceTest {
         }
 
         // when
-        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(item.getId(), 0, 5);
+//        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(item.getId(), 0, 5);
+        Page<CommentResponse> commentListResponseDto = commentService.readCommentList(item.getId(), 0, 5);
 
         // then
         assertThat(commentListResponseDto.getTotalElements()).isEqualTo(6L);
@@ -142,7 +144,8 @@ class CommentServiceTest {
         // given
 
         // when
-        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(5000L, 0, 5);
+//        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(5000L, 0, 5);
+        Page<CommentResponse> commentListResponseDto = commentService.readCommentList(5000L, 0, 5);
 
         // then
         assertThat(commentListResponseDto.getTotalElements()).isEqualTo(0L);

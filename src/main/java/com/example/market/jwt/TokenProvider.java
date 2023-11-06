@@ -21,7 +21,7 @@ import java.util.Set;
 @Component
 public class TokenProvider {
 
-    private Key key;
+    private final Key key;
     private final JwtParser jwtParser;
 
     public TokenProvider(@Value("${jwt.secret}") String key) {

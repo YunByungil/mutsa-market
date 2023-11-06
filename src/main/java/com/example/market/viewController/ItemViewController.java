@@ -1,6 +1,7 @@
 package com.example.market.viewController;
 
 import com.example.market.dto.comment.response.CommentListResponseDto;
+import com.example.market.dto.comment.response.CommentResponse;
 import com.example.market.dto.item.response.ItemListResponseDto;
 import com.example.market.dto.item.response.ItemOneResponseDto;
 import com.example.market.service.CommentService;
@@ -39,7 +40,8 @@ public class ItemViewController {
         ItemOneResponseDto itemOneResponseDto = itemService.readItemOne(itemId);
         System.out.println("itemOneResponseDto.getId() = " + itemOneResponseDto.getId());
 
-        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(itemId, 0, 20);
+//        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(itemId, 0, 20);
+        Page<CommentResponse> commentListResponseDto = commentService.readCommentList(itemId, 0, 20);
 
         model.addAttribute("item", itemOneResponseDto);
         model.addAttribute("commentList", commentListResponseDto);
