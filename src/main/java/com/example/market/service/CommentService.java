@@ -7,6 +7,7 @@ import com.example.market.dto.comment.request.CommentCreateRequestDto;
 import com.example.market.dto.comment.request.CommentReplyRequestDto;
 import com.example.market.dto.comment.request.CommentUpdateRequestDto;
 import com.example.market.dto.comment.response.CommentListResponseDto;
+import com.example.market.dto.comment.response.CommentResponse;
 import com.example.market.exception.ErrorCode;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.CommentRepository;
@@ -36,7 +37,7 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void create(Long itemId, CommentCreateRequestDto dto, Long userId) {
+    public CommentResponse create(Long itemId, CommentCreateRequestDto dto, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() ->
                         new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
@@ -44,15 +45,18 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        commentRepository.save(dto.toEntity(item, user));
+        Comment comment = commentRepository.save(dto.toEntity(item, user));
+
+        return CommentResponse.of(comment);
     }
 
-    public Page<CommentListResponseDto> readCommentList(Long itemId, int page, int limit) {
+    public Page<CommentResponse> readCommentList(Long itemId, int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
 
         Page<Comment> findCommentByAllItemId = commentRepository.findAllByItemId(itemId, pageable);
 
-        Page<CommentListResponseDto> commentListResponseDto = findCommentByAllItemId.map(CommentListResponseDto::new);
+//        Page<CommentListResponseDto> commentListResponseDto = findCommentByAllItemId.map(CommentListResponseDto::new);
+        Page<CommentResponse> commentListResponseDto = findCommentByAllItemId.map(CommentResponse::of);
 
         return commentListResponseDto;
     }
