@@ -24,12 +24,16 @@ public interface NegotiationRepository extends JpaRepository<Negotiation, Long> 
     @Query("select n " +
             "from Negotiation n " +
             "join fetch n.item " +
-            "join fetch n.user " +
+            "join fetch n.seller " +
             "where n.item.id =:itemId " +
-            "and n.user.id =:userId")
+            "and n.seller.id =:userId")
     Page<Negotiation> findAllByItemIdAndUserId(@Param("itemId") Long itemId, @Param("userId") Long userId, Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Query("update Negotiation n set n.status = 'REJECT' where n.id <> :negotiationId and n.item.id = :itemId")
     int updateNegotiationStatus(@Param("negotiationId") Long negotiationId, @Param("itemId") Long itemId);
+
+    Page<Negotiation> findAllBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
+
+    Page<Negotiation> findAllByBuyerId(@Param("buyerId") Long buyerId, Pageable pageable);
 }
