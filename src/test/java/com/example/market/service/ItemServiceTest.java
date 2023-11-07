@@ -7,6 +7,7 @@ import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
 import com.example.market.dto.item.response.ItemListResponseDto;
 import com.example.market.dto.item.response.ItemOneResponseDto;
+import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.user.UserRepository;
@@ -89,7 +90,7 @@ class ItemServiceTest {
         createItems();
 
         // when
-        Page<ItemListResponseDto> itemListDto = itemService.readItemList(page, limit);
+        Page<ItemResponse> itemListDto = itemService.readItemList(page, limit);
 
         // then
         assertThat(itemListDto.getSize()).isEqualTo(20);
@@ -109,7 +110,7 @@ class ItemServiceTest {
         Item save = itemRepository.save(dto.toEntity(user));
 
         // when
-        ItemOneResponseDto itemOneResponseDto = itemService.readItemOne(save.getId());
+        ItemResponse itemOneResponseDto = itemService.readItemOne(save.getId());
 
         // then
         assertThat(itemOneResponseDto.getTitle()).isEqualTo(dto.getTitle());

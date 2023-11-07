@@ -1,4 +1,4 @@
-package com.example.market.controller;
+package com.example.market.api.controller;
 
 import com.example.market.dto.RestDocsDto;
 import org.springframework.web.bind.annotation.GetMapping;

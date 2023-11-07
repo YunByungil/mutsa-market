@@ -1,4 +1,4 @@
-package com.example.market.controller;
+package com.example.market.api.controller.negotiation;
 
 import com.example.market.dto.negotiation.request.NegotiationCreateRequestDto;
 import com.example.market.dto.negotiation.request.NegotiationUpdateRequestDto;

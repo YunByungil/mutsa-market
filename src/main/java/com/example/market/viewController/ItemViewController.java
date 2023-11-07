@@ -4,6 +4,7 @@ import com.example.market.dto.comment.response.CommentListResponseDto;
 import com.example.market.dto.comment.response.CommentResponse;
 import com.example.market.dto.item.response.ItemListResponseDto;
 import com.example.market.dto.item.response.ItemOneResponseDto;
+import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.service.CommentService;
 import com.example.market.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class ItemViewController {
                                @RequestParam(value = "limit", defaultValue = "20") Integer limit,
                                Model model) {
 
-        Page<ItemListResponseDto> itemListResponseDto = itemService.readItemList(page, limit);
+        Page<ItemResponse> itemListResponseDto = itemService.readItemList(page, limit);
 
         model.addAttribute("itemList", itemListResponseDto);
         return "itemList";
@@ -37,7 +38,7 @@ public class ItemViewController {
 
     @GetMapping("/items/{itemId}")
     public String readItemOne(@PathVariable Long itemId, Model model) {
-        ItemOneResponseDto itemOneResponseDto = itemService.readItemOne(itemId);
+        ItemResponse itemOneResponseDto = itemService.readItemOne(itemId);
         System.out.println("itemOneResponseDto.getId() = " + itemOneResponseDto.getId());
 
 //        Page<CommentListResponseDto> commentListResponseDto = commentService.readCommentList(itemId, 0, 20);

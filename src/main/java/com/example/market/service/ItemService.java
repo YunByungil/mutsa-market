@@ -6,6 +6,7 @@ import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
 import com.example.market.dto.item.response.ItemListResponseDto;
 import com.example.market.dto.item.response.ItemOneResponseDto;
+import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.user.UserRepository;
@@ -37,30 +38,33 @@ public class ItemService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void create(ItemCreateRequestDto dto, Long userId) {
+    public ItemResponse create(ItemCreateRequestDto dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        itemRepository.save(dto.toEntity(user));
+
+        Item item = itemRepository.save(dto.toEntity(user));
+
+        return ItemResponse.of(item);
     }
 
-    public Page<ItemListResponseDto> readItemList(int page, int limit) {
+    public Page<ItemResponse> readItemList(int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
         Page<Item> itemList = itemRepository.findAll(pageable);
 
-        Page<ItemListResponseDto> result = itemList.map(ItemListResponseDto::new);
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
 
         return result;
     }
 
-    public ItemOneResponseDto readItemOne(Long itemId) {
+    public ItemResponse readItemOne(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
-        return new ItemOneResponseDto(item);
+        return ItemResponse.of(item);
     }
 
     @Transactional
-    public void updateItem(Long itemId, ItemUpdateRequestDto dto, Long userId) {
+    public ItemResponse updateItem(Long itemId, ItemUpdateRequestDto dto, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -69,11 +73,13 @@ public class ItemService {
         if (item.getUser().getId() != user.getId()) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
+
         item.update(dto);
+        return ItemResponse.of(item);
     }
 
     @Transactional
-    public void deleteItem(Long itemId, Long userId) {
+    public ItemResponse deleteItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -82,11 +88,13 @@ public class ItemService {
         if (item.getUser().getId() != user.getId()) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
+
         itemRepository.delete(item);
+        return ItemResponse.of(item);
     }
 
     @Transactional
-    public void updateItemImage(Long itemId, MultipartFile image, Long userId) throws IOException {
+    public ItemResponse updateItemImage(Long itemId, MultipartFile image, Long userId) throws IOException {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -127,6 +135,8 @@ public class ItemService {
 
         // itemUpdate
         item.updateItemImage(String.format("/static/%d/%s", itemId, profileFilename));
+
+        return ItemResponse.of(item);
     }
 
 }
