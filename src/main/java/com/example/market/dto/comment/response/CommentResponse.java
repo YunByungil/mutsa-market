@@ -12,16 +12,16 @@ public class CommentResponse {
     private Long id;
     private String content;
     private String reply;
-    private User user;
-    private Item item;
+    private String username;
+    private Long itemId;
 
     @Builder
-    public CommentResponse(final Long id, final String content, final String reply, final User user, final Item item) {
+    public CommentResponse(final Long id, final String content, final String reply, final String username, final Long itemId) {
         this.id = id;
         this.content = content;
         this.reply = reply;
-        this.user = user;
-        this.item = item;
+        this.username = username;
+        this.itemId = itemId;
     }
 
     public static CommentResponse of(final Comment comment) {
@@ -29,8 +29,8 @@ public class CommentResponse {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .reply(comment.getReply())
-                .user(comment.getUser())
-                .item(comment.getItem())
+                .username(comment.getUser().getUsername())
+                .itemId(comment.getItem().getId())
                 .build();
     }
 }

@@ -1,9 +1,11 @@
-package com.example.market.controller;
+package com.example.market.api.controller.item;
 
+import com.example.market.api.ApiResponse;
 import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
 import com.example.market.dto.item.response.ItemListResponseDto;
 import com.example.market.dto.item.response.ItemOneResponseDto;
+import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.dto.item.response.ItemResponseDto;
 import com.example.market.service.ItemService;
 import jakarta.validation.Valid;
@@ -25,55 +27,49 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping("/items")
-    public ResponseEntity<ItemResponseDto> create(@Valid @RequestBody ItemCreateRequestDto dto,
-                                                  Authentication authentication) {
+    public ApiResponse<ItemResponse> create(@Valid @RequestBody ItemCreateRequestDto dto,
+                                            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        itemService.create(dto, userId);
 
-        ItemResponseDto responseDto = new ItemResponseDto(REGISTER_ITEM);
-        return ResponseEntity.ok().body(responseDto);
+        return ApiResponse.ok(itemService.create(dto, userId));
     }
 
     @GetMapping("/items")
-    public Page<ItemListResponseDto> readItemList(@RequestParam(value = "page", defaultValue = "0") Integer page,
+    public ApiResponse<Page<ItemResponse>> readItemList(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                   @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
 
-        Page<ItemListResponseDto> itemListResponseDto = itemService.readItemList(page, limit);
-
-        return itemListResponseDto;
+        return ApiResponse.ok(itemService.readItemList(page, limit));
     }
 
     @GetMapping("/items/{itemId}")
-    public ResponseEntity<ItemOneResponseDto> readItemOne(@PathVariable Long itemId) {
-        ItemOneResponseDto itemDto = itemService.readItemOne(itemId);
+    public ApiResponse<ItemResponse> readItemOne(@PathVariable Long itemId) {
 
-        return ResponseEntity.ok().body(itemDto);
+        return ApiResponse.ok(itemService.readItemOne(itemId));
     }
 
     @PutMapping("/items/{itemId}")
-    public ItemResponseDto updateItem(@PathVariable Long itemId,
+    public ApiResponse<ItemResponse> updateItem(@PathVariable Long itemId,
                                       @Valid @RequestBody ItemUpdateRequestDto dto,
                                       Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        itemService.updateItem(itemId, dto, userId);
 
-        return new ItemResponseDto(UPDATE_ITEM);
+        return ApiResponse.ok(itemService.updateItem(itemId, dto, userId));
     }
 
     @DeleteMapping("/items/{itemId}")
-    public ItemResponseDto deleteItem(@PathVariable Long itemId,
+    public ApiResponse<ItemResponse> deleteItem(@PathVariable Long itemId,
                                       Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        itemService.deleteItem(itemId, userId);
-        return new ItemResponseDto(DELETE_ITEM);
+
+        return ApiResponse.ok(itemService.deleteItem(itemId, userId));
     }
 
-    @PutMapping("/items/{itemId}/image")
-    public ItemResponseDto updateItemImage(@PathVariable Long itemId,
+//    @PutMapping("/items/{itemId}/image")
+    @RequestMapping(value = "/items/{itemId}/image", method = {RequestMethod.POST, RequestMethod.PUT})
+    public ApiResponse<ItemResponse> updateItemImage(@PathVariable Long itemId,
                                            @RequestParam MultipartFile image,
                                            Authentication authentication) throws IOException {
         Long userId = Long.parseLong(authentication.getName());
-        itemService.updateItemImage(itemId, image, userId);
-        return new ItemResponseDto(REGISTER_IMAGE);
+        return ApiResponse.ok(itemService.updateItemImage(itemId, image, userId));
     }
 }

@@ -1,6 +1,7 @@
 package com.example.market.repository;
 
 import com.example.market.domain.entity.Item;
+import com.example.market.domain.entity.enums.ItemStatus;
 import com.example.market.domain.entity.enums.Role;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.item.request.ItemCreateRequestDto;
@@ -11,9 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+import static com.example.market.domain.entity.enums.ItemStatus.*;
+import static com.example.market.domain.entity.enums.ItemStatus.SOLD;
 import static org.assertj.core.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -39,21 +46,35 @@ class ItemRepositoryTest {
                 .build());
     }
 
-    @DisplayName("itemRepository.save() 기능 테스트")
+    @DisplayName("판매 중인 상품들을 조회한다.")
     @Test
-    void saveItem() {
+    void findAllByStatus() {
         // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
-                .title("제목1")
-                .description("내용1")
-                .minPriceWanted(10_000)
-                .build();
+        Item item1 = createItem("제목1", "내용1", SALE, 1000, user);
+        Item item2 = createItem("제목2", "내용2", SALE, 2000, user);
+        Item item3 = createItem("제목3", "내용3", SOLD, 3000, user);
+
+        itemRepository.saveAll(List.of(item1, item2, item3));
 
         // when
-        Item item = itemRepository.save(dto.toEntity(user));
+        Page<Item> items = itemRepository.findAllByStatus(forDisplay(), PageRequest.of(0, 5));
 
         // then
-        assertThat(item.getTitle()).isEqualTo(dto.getTitle());
+        assertThat(items).hasSize(2)
+                .extracting("title", "description", "status")
+                .containsExactlyInAnyOrder(
+                        tuple("제목1", "내용1", SALE),
+                        tuple("제목2", "내용2", SALE)
+                );
+    }
 
+    private Item createItem(final String title, final String description, final ItemStatus status, final int price, final User user) {
+        return Item.builder()
+                .title(title)
+                .description(description)
+                .status(status)
+                .minPriceWanted(price)
+                .user(user)
+                .build();
     }
 }
