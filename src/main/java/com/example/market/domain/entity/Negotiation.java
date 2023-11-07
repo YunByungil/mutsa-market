@@ -25,16 +25,25 @@ public class Negotiation {
     @JoinColumn(name = "item_id")
     private Item item;
 
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+//    private User user;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
 
     @Builder
-    public Negotiation(Item item, User user, int suggestedPrice) {
+    public Negotiation(Item item, final User seller, final User buyer, int suggestedPrice, final NegotiationStatus status) {
         this.item = item;
         this.suggestedPrice = suggestedPrice;
-        this.status = NegotiationStatus.SUGGEST;
-        this.user = user;
+        this.status = status;
+        this.seller = seller;
+        this.buyer = buyer;
     }
 
     public void updateNegotiation(int suggestedPrice) {
