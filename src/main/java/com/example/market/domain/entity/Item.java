@@ -39,12 +39,12 @@ public class Item {
     private List<Negotiation> negotiations = new ArrayList<>();
 
     @Builder
-    public Item(String title, String description, String imageUrl, int minPriceWanted, User user) {
+    public Item(String title, String description, String imageUrl, int minPriceWanted, User user, final ItemStatus status) {
         this.title = title;
         this.description = description;
         this.imageUrl = imageUrl;
         this.minPriceWanted = minPriceWanted;
-        this.status = ItemStatus.SALE;
+        this.status = status;
         this.user = user;
     }
 
