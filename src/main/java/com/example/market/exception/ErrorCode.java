@@ -8,6 +8,8 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     INVALID_WRITER(ResultCode.UNAUTHORIZED, "작성자 정보가 일치하지 않습니다."),
+    NOT_FOUND_USER(ResultCode.NOT_FOUND, "존재하지 않는 회원입니다."),
+
     NOT_MATCH_ITEM_AND_COMMENT(ResultCode.INVALID_ARGUMENT, "아이템 번호와 댓글 번호가 일치하지 않습니다."),
     NOT_FOUND_ITEM(ResultCode.NOT_FOUND, "존재하지 않는 아이템입니다."),
     NOT_FOUND_COMMENT(ResultCode.NOT_FOUND, "존재하지 않는 댓글입니다."),
