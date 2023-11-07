@@ -1,5 +1,6 @@
 package com.example.market.controller;
 
+import com.example.market.ControllerTestSupport;
 import com.example.market.domain.entity.Item;
 import com.example.market.domain.entity.Negotiation;
 import com.example.market.domain.entity.enums.NegotiationStatus;
@@ -45,354 +46,107 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@ExtendWith({RestDocumentationExtension.class})
-@SpringBootTest
-class NegotiationControllerTest {
+class NegotiationControllerTest extends ControllerTestSupport {
 
-    @Autowired
-    private WebApplicationContext context;
-
-    private MockMvc mvc;
-
-
-    @Autowired
-    NegotiationRepository negotiationRepository;
-
-    @Autowired
-    NegotiationService negotiationService;
-
-    @Autowired
-    ItemRepository itemRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    User user;
-    User buyer;
-    User buyer2;
-    Item item;
-
-    @BeforeEach
-    void setUp(RestDocumentationContextProvider restDocumentation) {
-        negotiationRepository.deleteAll();
-
-        mvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(documentationConfiguration(restDocumentation)
-                        .operationPreprocessors()
-                        .withResponseDefaults(prettyPrint())
-                        .withRequestDefaults(prettyPrint()))
-                .build();
-
-        user = userRepository.save(User.builder()
-                .username("판매자")
-                .password("비밀번호")
-                .role(Role.ADMIN)
-                .build());
-        buyer = userRepository.save(User.builder()
-                .username("구매자")
-                .password("비밀번호")
-                .role(Role.USER)
-                .build());
-        buyer2 = userRepository.save(User.builder()
-                .username("구매자2")
-                .password("비밀번호")
-                .role(Role.USER)
-                .build());
-
-        item = itemRepository.save(Item.builder()
-                .title("제목")
-                .description("설명")
-                .minPriceWanted(10_000)
-                .imageUrl("사진")
-                .user(user)
-                .build());
-
-        SecurityContext context1 = SecurityContextHolder.getContext();
-        context1.setAuthentication(new UsernamePasswordAuthenticationToken(user.getId(), user.getPassword(), new ArrayList<>()));
-    }
-
-//    @AfterEach
-//    void end() {
-//        itemRepository.deleteAll();
-//        negotiationRepository.deleteAll();
-//    }
-
-    @DisplayName("구매 제안 등록 API")
+    @DisplayName("가격을 제안합니다.")
     @Test
-    void createNegotiation() throws Exception {
+    void createProposals() throws Exception {
         // given
-        final int price = 5_000;
-        NegotiationCreateRequestDto createDto = NegotiationCreateRequestDto.builder()
-                .suggestedPrice(price)
+        NegotiationCreateRequestDto request = NegotiationCreateRequestDto.builder()
+                .status(NegotiationStatus.SUGGEST)
+                .suggestedPrice(5_000)
                 .build();
 
-        String url = "http://localhost:8080/items/{itemId}/proposals";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + buyer.getId());
-
-        // when
-        mvc.perform(post(url, item.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication)
-                        .content(new ObjectMapper().writeValueAsString(createDto)))
+        // when // then
+        mockMvc.perform(
+                        post("/items/{itemId}/proposals", 1L).with(csrf())
+                                .content(objectMapper.writeValueAsBytes(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("/proposals",
-                        requestFields(
-                                fieldWithPath("suggestedPrice").description("제안 가격")
-                        ),
-                        pathParameters(
-                                parameterWithName("itemId").description("물품 ID")
-                        )));
-        // then
-
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    @DisplayName("구매 제안 가격 수정 API")
+    @DisplayName("가격을 제안할 때, 제안 상태는 필수입니다.")
     @Test
-    void updateNegotiation() throws Exception {
+    void createNegotiationWithoutNegotiationStatus() throws Exception {
         // given
-        final int price = 5_000;
-        final int updatePrice = 10_000;
-        Long negotiationId = createNegotiationOne(price, buyer);
-
-        NegotiationUpdateRequestDto updateDto = NegotiationUpdateRequestDto.builder()
-                .suggestedPrice(updatePrice)
+        NegotiationCreateRequestDto request = NegotiationCreateRequestDto.builder()
+//                .status(NegotiationStatus.SUGGEST)
+                .suggestedPrice(5_0000)
                 .build();
 
-        String url = "http://localhost:8080/items/{itemId}/proposals/{proposalId}";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + buyer.getId());
-
-        // when
-        mvc.perform(put(url, item.getId(), negotiationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication)
-                        .content(new ObjectMapper().writeValueAsString(updateDto)))
-                .andExpect(status().isOk())
-                .andDo(document("/proposals-update",
-                        requestFields(
-                                fieldWithPath("suggestedPrice").description("수정한 제안 가격"),
-                                fieldWithPath("status").description("null")
-                        ),
-                        pathParameters(
-                                parameterWithName("itemId").description("물품 ID"),
-                                parameterWithName("proposalId").description("제안 ID")
-
-                        )));
-
-        // then
-
+        // when // then
+        mockMvc.perform(
+                        post("/items/{itemId}/proposals", 1L).with(csrf())
+                                .content(objectMapper.writeValueAsBytes(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("제안 상태는 필수입니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    @DisplayName("구매 제안 삭제 API")
+    @DisplayName("가격을 제안할 때, 가격은 양수여야 합니다.")
     @Test
-    void deleteNegotiation() throws Exception {
+    void createNegotiationWithZeroPrice() throws Exception {
         // given
-        final int price = 5_000;
-        Long negotiationId = createNegotiationOne(price, buyer);
+        NegotiationCreateRequestDto request = NegotiationCreateRequestDto.builder()
+                .status(NegotiationStatus.SUGGEST)
+                .suggestedPrice(0)
+                .build();
 
-        String url = "http://localhost:8080/items/{itemId}/proposals/{proposalId}";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + buyer.getId());
-
-        // when
-        mvc.perform(delete(url, item.getId(), negotiationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication))
-                .andExpect(status().isOk())
-                .andDo(document("/proposals-delete",
-                        pathParameters(
-                                parameterWithName("itemId").description("물품 ID"),
-                                parameterWithName("proposalId").description("제안 ID")
-
-                        )));
-
-        // then
-
+        // when // then
+        mockMvc.perform(
+                        post("/items/{itemId}/proposals", 1L).with(csrf())
+                                .content(objectMapper.writeValueAsBytes(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("가격은 양수여야 합니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    @DisplayName("구매 제안 상태 변경 API")
+    @DisplayName("가격을 제안 받은 내역을 불러온다. (내가 받은 제안들)")
     @Test
-    void updateNegotiationStatus() throws Exception {
-        // given
-        final int price = 5_000;
-        Long negotiationId = createNegotiationOne(price, buyer);
-
-        NegotiationUpdateRequestDto updateDto = NegotiationUpdateRequestDto.builder()
-                .status(NegotiationStatus.ACCEPT.getStatus())
-                .build();
-
-        String url = "http://localhost:8080/items/{itemId}/proposals/{proposalId}";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + user.getId());
-
-        // when
-        mvc.perform(put(url, item.getId(), negotiationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication)
-                        .content(new ObjectMapper().writeValueAsString(updateDto)))
+    void getReceivedNegotiationItems() throws Exception {
+        // when // then
+        mockMvc.perform(
+                        get("/items/received/proposals").with(csrf())
+                )
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("/proposals-statusUpdate",
-                        requestFields(
-                                fieldWithPath("status").description("제안 상태 - 수락 or 거절"),
-                                fieldWithPath("suggestedPrice").description("0")
-                        ),
-                        pathParameters(
-                                parameterWithName("itemId").description("물품 ID"),
-                                parameterWithName("proposalId").description("제안 ID")
-
-                        )));
-
-        // then
-
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"));
     }
 
-    @DisplayName("구매 확정 API")
+    @DisplayName("가격을 제안 보낸 내역을 불러온다. (내가 보낸 제안들)")
     @Test
-    void purchaseConfirm() throws Exception {
-        // given
-        final int price = 5_000;
-        Long negotiationId = createNegotiationStatusIsAccept(price, buyer);
-
-
-        NegotiationUpdateRequestDto updateDto = NegotiationUpdateRequestDto.builder()
-                .status(NegotiationStatus.CONFIRM.getStatus())
-                .build();
-
-        String url = "http://localhost:8080/items/{itemId}/proposals/{proposalId}";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + buyer.getId());
-
-        // when
-        mvc.perform(put(url, item.getId(), negotiationId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication)
-                        .content(new ObjectMapper().writeValueAsString(updateDto)))
+    void getSentNegotiationItems() throws Exception {
+        // when // then
+        mockMvc.perform(
+                        get("/items/sent/proposals").with(csrf())
+                )
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("/proposals-purchaseConfirm",
-                        requestFields(
-                                fieldWithPath("status").description(NegotiationStatus.CONFIRM.getStatus()),
-                                fieldWithPath("suggestedPrice").description("0")
-                        ),
-                        pathParameters(
-                                parameterWithName("itemId").description("물품 ID"),
-                                parameterWithName("proposalId").description("제안 ID")
-
-                        )));
-
-        // then
-
-    }
-
-    // TODO
-//    @DisplayName("제안 작성자 기준 구매 제안 페이징 조회 API")
-//    @Test
-//    void readAllNegotiationByBuyer() throws Exception {
-//        // given
-//        final int price = 5_000;
-//        for (int i = 1; i <= 5; i++) {
-//            NegotiationCreateRequestDto createDto = NegotiationCreateRequestDto.builder()
-//                    .suggestedPrice(price * i)
-//                    .build();
-//
-//            negotiationService.createNegotiation(item.getId(), createDto, buyer.getId());
-//        }
-//
-//        String url = "http://localhost:8080/items/{itemId}/proposals";
-//
-//
-//        // when
-//        mvc.perform(get(url, itemId)
-//                        .param("page", "0")
-//                        .param("limit", "5")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(new ObjectMapper().writeValueAsString(listDto)))
-//                .andExpect(status().isOk())
-//                .andDo(document("/proposals-get-all-buyer",
-//                        pathParameters(
-//                                parameterWithName("itemId").description("아이템 ID")
-//                        ),
-//                        queryParameters(
-//                                parameterWithName("page").description("현재 페이지"),
-//                                parameterWithName("limit").description("한 페이지당 조회할 데이터 개수")
-//                        ),
-//                        requestFields(
-//                                fieldWithPath("writer").description("제안 작성자"),
-//                                fieldWithPath("password").description("제안 비밀번호")
-//                        )));
-//        // then
-//    }
-
-    @DisplayName("판매자 기준 구매 제안 페이징 조회 API")
-    @Test
-    void readAllNegotiationBySeller() throws Exception {
-        // given
-        final int price = 5_000;
-        for (int i = 1; i <= 5; i++) {
-            NegotiationCreateRequestDto createDto = NegotiationCreateRequestDto.builder()
-                    .suggestedPrice(price * i)
-                    .build();
-
-            negotiationService.createNegotiation(item.getId(), createDto, buyer.getId());
-        }
-
-        String url = "http://localhost:8080/items/{itemId}/proposals";
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        Mockito.when(authentication.getName()).thenReturn("" + user.getId());
-
-        // when
-        mvc.perform(get(url, item.getId())
-                        .param("page", "0")
-                        .param("limit", "5")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .principal(authentication))
-                .andExpect(status().isOk())
-                .andDo(document("/proposals-get-all-seller",
-                        pathParameters(
-                                parameterWithName("itemId").description("아이템 ID")
-                        ),
-                        queryParameters(
-                                parameterWithName("page").description("현재 페이지"),
-                                parameterWithName("limit").description("한 페이지당 조회할 데이터 개수")
-                        )));
-
-        // then
-
-    }
-
-    private Long createNegotiationOne(int price, User buyer) {
-        NegotiationCreateRequestDto createDto = NegotiationCreateRequestDto.builder()
-                .suggestedPrice(price)
-                .build();
-
-        Negotiation negotiation = negotiationRepository.save(createDto.toEntity(item, buyer));
-
-        return negotiation.getId();
-    }
-
-    private Long createNegotiationStatusIsAccept(int price, User buyer) {
-        NegotiationCreateRequestDto createDto = NegotiationCreateRequestDto.builder()
-                .suggestedPrice(price)
-                .build();
-
-        Negotiation negotiation = negotiationRepository.save(createDto.toEntity(item, buyer));
-
-        NegotiationUpdateRequestDto updateStatusDto = NegotiationUpdateRequestDto.builder()
-                .status("수락")
-                .build();
-
-        negotiationService.updateNegotiation(item.getId(), negotiation.getId(), updateStatusDto, user.getId());
-
-        return negotiation.getId();
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"));
     }
 }
