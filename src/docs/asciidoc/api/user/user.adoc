@@ -1,0 +1,10 @@
+[[user-create]]
+=== 회원가입
+
+==== HTTP Request
+include::{snippets}/user-create/http-request.adoc[]
+include::{snippets}/user-create/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/user-create/http-response.adoc[]
+include::{snippets}/user-create/response-fields.adoc[]
