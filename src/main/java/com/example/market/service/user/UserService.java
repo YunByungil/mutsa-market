@@ -3,6 +3,7 @@ package com.example.market.service.user;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.response.UserCreateResponseDto;
+import com.example.market.dto.user.response.UserResponse;
 import com.example.market.exception.ErrorCode;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.user.UserRepository;
@@ -22,12 +23,12 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserCreateResponseDto createUser(UserCreateRequestDto dto) {
+    public UserResponse createUser(UserCreateRequestDto dto) {
         validateDuplicateUsername(dto.getUsername());
         User user = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
         User savedUser = userRepository.save(user);
 
-        return new UserCreateResponseDto(savedUser);
+        return UserResponse.of(savedUser);
     }
 
     private void validateDuplicateUsername(String username) {

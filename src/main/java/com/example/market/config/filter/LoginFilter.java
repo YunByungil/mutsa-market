@@ -1,7 +1,9 @@
 package com.example.market.config.filter;
 
+import com.example.market.api.ApiResponse;
 import com.example.market.domain.entity.user.PrincipalUserDetails;
 import com.example.market.domain.entity.user.User;
+import com.example.market.dto.user.request.UserLoginRequest;
 import com.example.market.jwt.TokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -31,7 +33,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            User user = objectMapper.readValue(request.getInputStream(), User.class);
+//            User user = objectMapper.readValue(request.getInputStream(), User.class);
+            UserLoginRequest user = objectMapper.readValue(request.getInputStream(), UserLoginRequest.class);
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
@@ -73,6 +76,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.getWriter().println(
                 objectMapper.writeValueAsString(
-                        TokenResponse.authResponse(HttpServletResponse.SC_OK, result)));
+                        ApiResponse.ok(result)));
+//        response.getWriter().println(
+//                objectMapper.writeValueAsString(
+//                        TokenResponse.authResponse(HttpServletResponse.SC_OK, result)));
     }
 }

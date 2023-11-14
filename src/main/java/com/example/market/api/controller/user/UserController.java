@@ -3,6 +3,7 @@ package com.example.market.api.controller.user;
 import com.example.market.api.ApiResponse;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.response.UserCreateResponseDto;
+import com.example.market.dto.user.response.UserResponse;
 import com.example.market.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public ApiResponse<UserCreateResponseDto> createUser(@Valid @RequestBody UserCreateRequestDto createDto) {
+    public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserCreateRequestDto createDto) {
         return ApiResponse.ok(userService.createUser(createDto));
     }
 }

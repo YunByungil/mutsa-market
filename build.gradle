@@ -55,44 +55,33 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-ext {
-	asciidocVersion = "3.0.0.RELEASE"
-	snippetsDir = file('build/generated-snippets')
-}
-test {
+tasks.named('test') {
 	useJUnitPlatform()
-	outputs.dir snippetsDir
 }
 
-asciidoctor.doFirst {
-	delete file('src/main/resources/static/docs')
+ext { // 전역 변수
+	snippetsDir = file('build/generated-snippets')
+}
+
+test {
+	outputs.dir snippetsDir
 }
 
 asciidoctor {
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
+
+	sources {
+		include("**/index.adoc")
+	}
+	baseDirFollowsSourceFile() // 다른 adoc 파일을 include 할 때 경로를 baseDir로 맞춘다.
 	dependsOn test
 }
 
 bootJar {
 	dependsOn asciidoctor
 
-	copy {
-		from asciidoctor.outputDir
-		into "src/main/resources/static/docs"
+	from("${asciidoctor.outputDir}") {
+		into 'static/docs'
 	}
-}
-
-task copyDocument(type: Copy) {
-	dependsOn asciidoctor
-	from file("build/docs/asciidoc")
-	into file("src/main/resources/static/docs")
-}
-
-build {
-	dependsOn copyDocument
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }
