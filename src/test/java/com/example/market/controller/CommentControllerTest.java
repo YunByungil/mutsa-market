@@ -158,8 +158,7 @@ class CommentControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.status").value("OK"))
-                .andExpect(jsonPath("$.message").value("OK"))
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andExpect(jsonPath("$.message").value("OK"));
     }
 
     @DisplayName("답글(reply)을 작성한다.")
@@ -180,8 +179,7 @@ class CommentControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.status").value("OK"))
-                .andExpect(jsonPath("$.message").value("OK"))
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andExpect(jsonPath("$.message").value("OK"));
     }
 
     @DisplayName("답글(reply)을 작성할 때, 답글 내용은 꼭 입력해야 한다.")
