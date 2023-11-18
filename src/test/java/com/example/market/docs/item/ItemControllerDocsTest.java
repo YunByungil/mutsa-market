@@ -111,9 +111,9 @@ public class ItemControllerDocsTest extends RestDocsSupport {
     @Test
     void readItemList() throws Exception {
         List<ItemResponse> list = List.of(
-                createItemResponse("상품제목1", 10_000, "판매자"),
-                createItemResponse("상품제목2", 20_000, "판매자2"),
-                createItemResponse("상품제목3", 30_000, "판매자3")
+                createItemResponse(1L, "상품제목1", 10_000, "판매자"),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자2"),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자3")
         );
 
         Page<ItemResponse> result = new PageImpl<>(list);
@@ -191,7 +191,7 @@ public class ItemControllerDocsTest extends RestDocsSupport {
     @Test
     void readItemOne() throws Exception {
         given(itemService.readItemOne(anyLong()))
-                .willReturn(createItemResponse("상품제목", 10_000, "판매자"));
+                .willReturn(createItemResponse(1L, "상품제목", 10_000, "판매자"));
 
         mockMvc.perform(
                         get("/items/{itemId}", 1L)
@@ -336,9 +336,9 @@ public class ItemControllerDocsTest extends RestDocsSupport {
         return authentication;
     }
 
-    private ItemResponse createItemResponse(final String title, final int minPriceWanted, final String username) {
+    private ItemResponse createItemResponse(final Long id, final String title, final int minPriceWanted, final String username) {
         return ItemResponse.builder()
-                .id(1L)
+                .id(id)
                 .title(title)
                 .description("상품내용")
                 .status(SALE)
