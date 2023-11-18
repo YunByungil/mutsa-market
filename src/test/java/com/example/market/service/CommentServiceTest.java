@@ -77,6 +77,7 @@ class CommentServiceTest {
     void end() {
         itemRepository.deleteAll();
         commentRepository.deleteAll();
+        userRepository.deleteAllInBatch();
     }
 
     @DisplayName("댓글 생성 기능 테스트")
