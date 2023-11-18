@@ -10,6 +10,7 @@ import com.example.market.service.NegotiationService;
 import com.example.market.service.user.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,11 @@ public class UserControllerDocsSecurityTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
 
     @DisplayName("로그인 API")
     @Test
@@ -90,5 +96,51 @@ public class UserControllerDocsSecurityTest {
                                         .description("액세스 토큰")
                         )
                         ));
+    }
+
+    @DisplayName("로그인 시 username이 일치하지 않으면 예외가 발생한다.")
+    @Test
+    void loginWithNoUser() throws Exception {
+        User user = User.builder()
+                .username("아이디")
+                .password(passwordEncoder.encode("비밀번호"))
+                .build();
+        userRepository.save(user);
+
+        UserLoginRequest login = UserLoginRequest.builder()
+                .username("틀린 아이디")
+                .password("비밀번호")
+                .build();
+
+        mockMvc.perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(new ObjectMapper().writeValueAsString(login))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("로그인 시 password가 일치하지 않으면 예외가 발생한다.")
+    @Test
+    void loginWithNoPassword() throws Exception {
+        User user = User.builder()
+                .username("아이디")
+                .password(passwordEncoder.encode("비밀번호"))
+                .build();
+        userRepository.save(user);
+
+        UserLoginRequest login = UserLoginRequest.builder()
+                .username("아이디")
+                .password("틀린 비밀번호")
+                .build();
+
+        mockMvc.perform(
+                        post("/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(new ObjectMapper().writeValueAsString(login))
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }
