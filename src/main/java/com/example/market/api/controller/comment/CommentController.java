@@ -25,13 +25,12 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/items/{itemId}/comments")
-    public ApiResponse<CommentResponseDto> create(@PathVariable Long itemId,
+    public ApiResponse<CommentResponse> create(@PathVariable Long itemId,
                                                  @Valid @RequestBody CommentCreateRequestDto dto,
                                                  Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        commentService.create(itemId, dto, userId);
 
-        return ApiResponse.ok(new CommentResponseDto(REGISTER_COMMENT));
+        return ApiResponse.ok(commentService.create(itemId, dto, userId));
     }
 
     @GetMapping("/items/{itemId}/comments")
