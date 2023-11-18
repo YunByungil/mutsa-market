@@ -12,8 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,17 +35,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-//            User user = objectMapper.readValue(request.getInputStream(), User.class);
             UserLoginRequest user = objectMapper.readValue(request.getInputStream(), UserLoginRequest.class);
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
 
             return authenticationManager.authenticate(authenticationToken);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("{}", e);
+            throw new InternalAuthenticationServiceException(e.getMessage());
+//            return super.attemptAuthentication(request, response);
         }
-        return super.attemptAuthentication(request, response);
     }
 
     @Override
@@ -62,10 +64,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         setTokenResponse(response, token);
     }
 
-//    @Override
-//    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-//        super.unsuccessfulAuthentication(request, response, failed);
-//    }
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+        response.getWriter().println(
+                objectMapper.writeValueAsString(
+                        ApiResponse.of(HttpStatus.UNAUTHORIZED, "로그인 실패", null)));
+    }
 
     private void setTokenResponse(HttpServletResponse response, String accessToken) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
@@ -77,8 +84,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().println(
                 objectMapper.writeValueAsString(
                         ApiResponse.ok(result)));
-//        response.getWriter().println(
-//                objectMapper.writeValueAsString(
-//                        TokenResponse.authResponse(HttpServletResponse.SC_OK, result)));
     }
 }
