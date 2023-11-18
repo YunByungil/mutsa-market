@@ -1,0 +1,30 @@
+[[negotiation-create]]
+=== 제안 등록
+
+==== HTTP Request
+include::{snippets}/negotiation-create/http-request.adoc[]
+include::{snippets}/negotiation-create/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/negotiation-create/http-response.adoc[]
+include::{snippets}/negotiation-create/response-fields.adoc[]
+
+[[negotiation-received-list]]
+=== 받은 제안 목록
+
+==== HTTP Request
+include::{snippets}/negotiation-receive-list/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/negotiation-receive-list/http-response.adoc[]
+include::{snippets}/negotiation-receive-list/response-fields.adoc[]
+
+[[negotiation-sent-list]]
+=== 보낸 제안 목록
+
+==== HTTP Request
+include::{snippets}/negotiation-sent-list/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/negotiation-sent-list/http-response.adoc[]
+include::{snippets}/negotiation-sent-list/response-fields.adoc[]
