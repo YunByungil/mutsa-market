@@ -1,0 +1,52 @@
+[[comment-create]]
+=== 댓글 등록
+
+==== HTTP Request
+include::{snippets}/comment-create/http-request.adoc[]
+include::{snippets}/comment-create/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/comment-create/http-response.adoc[]
+include::{snippets}/comment-create/response-fields.adoc[]
+
+[[comment-read-list]]
+=== 댓글 페이징 조회
+
+==== HTTP Request
+include::{snippets}/comment-read-list/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/comment-read-list/http-response.adoc[]
+include::{snippets}/comment-read-list/response-fields.adoc[]
+
+[[comment-update]]
+=== 댓글 수정
+
+==== HTTP Request
+include::{snippets}/comment-update/http-request.adoc[]
+include::{snippets}/comment-update/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/comment-update/http-response.adoc[]
+include::{snippets}/comment-update/response-fields.adoc[]
+
+[[comment-delete]]
+=== 댓글 삭제
+
+==== HTTP Request
+include::{snippets}/comment-delete/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/comment-delete/http-response.adoc[]
+include::{snippets}/comment-delete/response-fields.adoc[]
+
+[[comment-reply]]
+=== 답글 작성
+
+==== HTTP Request
+include::{snippets}/comment-reply/http-request.adoc[]
+include::{snippets}/comment-reply/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/comment-reply/http-response.adoc[]
+include::{snippets}/comment-reply/response-fields.adoc[]
