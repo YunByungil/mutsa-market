@@ -13,4 +13,16 @@ endif::[]
 == User API
 
 include::api/user/user.adoc[]
+
+[[Item-API]]
+== Item API
 include::api/item/item.adoc[]
+
+[[Comment-API]]
+== Comment API
+include::api/comment/comment.adoc[]
+
+[[Negotiation-API]]
+== Negotiation API
+include::api/negotiation/negotiation.adoc[]
+
