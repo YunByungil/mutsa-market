@@ -1,0 +1,54 @@
+[[item-create]]
+=== 상품등록
+
+==== HTTP Request
+include::{snippets}/item-create/http-request.adoc[]
+include::{snippets}/item-create/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-create/http-response.adoc[]
+include::{snippets}/item-create/response-fields.adoc[]
+
+[[item-read-list]]
+=== 상품 페이징 조회
+
+==== HTTP Request
+include::{snippets}/item-read-list/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/item-read-list/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-read-list/http-response.adoc[]
+include::{snippets}/item-read-list/response-fields.adoc[]
+
+[[item-read-one]]
+=== 상품 단건 조회
+
+==== HTTP Request
+include::{snippets}/item-read-one/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-read-one/http-response.adoc[]
+include::{snippets}/item-read-one/response-fields.adoc[]
+
+[[item-update]]
+=== 상품 정보 수정
+
+==== HTTP Request
+include::{snippets}/item-update/http-request.adoc[]
+include::{snippets}/item-update/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-update/http-response.adoc[]
+include::{snippets}/item-update/response-fields.adoc[]
+
+[[item-delete]]
+=== 상품 삭제
+
+==== HTTP Request
+include::{snippets}/item-delete/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-delete/http-response.adoc[]
+include::{snippets}/item-delete/response-fields.adoc[]
