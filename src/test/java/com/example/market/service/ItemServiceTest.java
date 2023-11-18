@@ -58,6 +58,7 @@ class ItemServiceTest {
     @AfterEach
     void end() {
         itemRepository.deleteAll();
+        userRepository.deleteAllInBatch();
     }
 
     @DisplayName("아이템 등록 테스트")
