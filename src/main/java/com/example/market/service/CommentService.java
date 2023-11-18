@@ -61,7 +61,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(Long itemId, Long commentId, CommentUpdateRequestDto dto, Long userId) {
+    public CommentResponse updateComment(Long itemId, Long commentId, CommentUpdateRequestDto dto, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -75,10 +75,11 @@ public class CommentService {
         }
 
         comment.update(dto);
+        return CommentResponse.of(comment);
     }
 
     @Transactional
-    public void deleteComment(Long itemId, Long commentId, Long userId) {
+    public CommentResponse deleteComment(Long itemId, Long commentId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -92,10 +93,11 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
+        return CommentResponse.of(comment);
     }
 
     @Transactional
-    public void updateCommentReply(Long itemId, Long commentId, CommentReplyRequestDto replyDto, Long userId) {
+    public CommentResponse updateCommentReply(Long itemId, Long commentId, CommentReplyRequestDto replyDto, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
@@ -109,6 +111,7 @@ public class CommentService {
         }
 
         comment.updateCommentReply(replyDto);
+        return CommentResponse.of(comment);
     }
 
 }

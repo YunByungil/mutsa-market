@@ -25,13 +25,12 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/items/{itemId}/comments")
-    public ApiResponse<CommentResponseDto> create(@PathVariable Long itemId,
+    public ApiResponse<CommentResponse> create(@PathVariable Long itemId,
                                                  @Valid @RequestBody CommentCreateRequestDto dto,
                                                  Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        commentService.create(itemId, dto, userId);
 
-        return ApiResponse.ok(new CommentResponseDto(REGISTER_COMMENT));
+        return ApiResponse.ok(commentService.create(itemId, dto, userId));
     }
 
     @GetMapping("/items/{itemId}/comments")
@@ -44,35 +43,32 @@ public class CommentController {
     }
 
     @PutMapping("/items/{itemId}/comments/{commentId}")
-    public ApiResponse<CommentResponseDto> updateComment(@PathVariable Long itemId,
+    public ApiResponse<CommentResponse> updateComment(@PathVariable Long itemId,
                                             @PathVariable Long commentId,
                                             @Valid @RequestBody CommentUpdateRequestDto dto,
                                             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        commentService.updateComment(itemId, commentId, dto, userId);
 
-        return ApiResponse.ok(new CommentResponseDto(UPDATE_COMMENT));
+        return ApiResponse.ok(commentService.updateComment(itemId, commentId, dto, userId));
     }
 
     @DeleteMapping("/items/{itemId}/comments/{commentId}")
-    public ApiResponse<CommentResponseDto> deleteComment(@PathVariable Long itemId,
+    public ApiResponse<CommentResponse> deleteComment(@PathVariable Long itemId,
                                             @PathVariable Long commentId,
                                             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        commentService.deleteComment(itemId, commentId, userId);
 
-        return ApiResponse.ok(new CommentResponseDto(DELETE_COMMENT));
+        return ApiResponse.ok(commentService.deleteComment(itemId, commentId, userId));
     }
 
 
     @PutMapping("/items/{itemId}/comments/{commentId}/reply")
-    public ApiResponse<CommentResponseDto> updateCommentReply(@PathVariable Long itemId,
+    public ApiResponse<CommentResponse> updateCommentReply(@PathVariable Long itemId,
                                                  @PathVariable Long commentId,
                                                  @Valid @RequestBody CommentReplyRequestDto replyDto,
                                                  Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        commentService.updateCommentReply(itemId, commentId, replyDto, userId);
 
-        return ApiResponse.ok(new CommentResponseDto(REGISTER_REPLY));
+        return ApiResponse.ok(commentService.updateCommentReply(itemId, commentId, replyDto, userId));
     }
 }

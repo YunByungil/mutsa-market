@@ -1,11 +1,13 @@
-package com.example.market.docs.item;
+package com.example.market.docs.comment;
 
-import com.example.market.api.controller.item.ItemController;
+import com.example.market.api.controller.comment.CommentController;
 import com.example.market.docs.RestDocsSupport;
-import com.example.market.dto.item.request.ItemCreateRequestDto;
-import com.example.market.dto.item.request.ItemUpdateRequestDto;
+import com.example.market.dto.comment.request.CommentCreateRequestDto;
+import com.example.market.dto.comment.request.CommentReplyRequestDto;
+import com.example.market.dto.comment.request.CommentUpdateRequestDto;
+import com.example.market.dto.comment.response.CommentResponse;
 import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.service.ItemService;
+import com.example.market.service.CommentService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,71 +18,58 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-import static com.example.market.domain.entity.enums.ItemStatus.SALE;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
+import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ItemControllerDocsTest extends RestDocsSupport {
+public class CommentControllerDocsTest extends RestDocsSupport {
 
-    private final ItemService itemService = mock(ItemService.class);
+    private final CommentService commentService = mock(CommentService.class);
 
     @Override
     protected Object initController() {
-        return new ItemController(itemService);
+        return new CommentController(commentService);
     }
 
-    @DisplayName("판매 상품 등록 API")
+    @DisplayName("댓글 등록 API")
     @Test
-    void createItem() throws Exception {
+    void createComment() throws Exception {
         Authentication authentication = getAuthentication();
 
-        ItemCreateRequestDto request = ItemCreateRequestDto.builder()
-                .title("상품이름")
-                .description("상품설명")
-                .minPriceWanted(10_000)
-                .status(SALE)
+        CommentCreateRequestDto request = CommentCreateRequestDto.builder()
+                .content("댓글내용")
                 .build();
 
-        given(itemService.create(any(ItemCreateRequestDto.class), anyLong()))
-                .willReturn(ItemResponse.builder()
-                        .id(1L)
-                        .status(SALE)
-                        .username("판매자")
-                        .title("상품이름")
-                        .description("상품설명")
-                        .minPriceWanted(10_000)
-                        .build());
+        given(commentService.create(anyLong(), any(CommentCreateRequestDto.class), anyLong()))
+                .willReturn(createCommentResponse(1L, "작성자", request.getContent(), null));
 
         mockMvc.perform(
-                        post("/items")
-                                .content(objectMapper.writeValueAsString(request))
+                        post("/items/{itemId}/comments", 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
                                 .principal(authentication)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("item-create",
+                .andDo(document("comment-create",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
-                                fieldWithPath("title").type(STRING)
-                                        .description("상품이름"),
-                                fieldWithPath("description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("status").type(STRING)
-                                        .description("판매상태")
+                                fieldWithPath("content").type(STRING)
+                                        .description("댓글내용")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
@@ -92,42 +81,41 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data").type(OBJECT)
                                         .description("응답 데이터"),
                                 fieldWithPath("data.id").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data.title").type(STRING)
-                                        .description("상품제목"),
-                                fieldWithPath("data.description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("data.minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("data.status").type(STRING)
-                                        .description("판매상태"),
+                                        .description("댓글 ID"),
+                                fieldWithPath("data.content").type(STRING)
+                                        .description("댓글내용"),
                                 fieldWithPath("data.username").type(STRING)
-                                        .description("판매자")
+                                        .description("작성자"),
+                                fieldWithPath("data.itemId").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.reply").type(NULL)
+                                        .optional()
+                                        .description("답글")
                         )
                 ));
     }
 
-    @DisplayName("판매상품 페이징 조회 API")
+    @DisplayName("댓글 페이징 조회 API")
     @Test
-    void readItemList() throws Exception {
-        List<ItemResponse> list = List.of(
-                createItemResponse(1L, "상품제목1", 10_000, "판매자"),
-                createItemResponse(2L, "상품제목2", 20_000, "판매자2"),
-                createItemResponse(3L, "상품제목3", 30_000, "판매자3")
+    void readCommentList() throws Exception {
+        List<CommentResponse> commentResponses = List.of(
+                createCommentResponse(1L, "유저1", "댓글내용1", "답글1"),
+                createCommentResponse(2L, "유저2", "댓글내용2", null),
+                createCommentResponse(3L, "유저3", "댓글내용3", null)
         );
 
-        Page<ItemResponse> result = new PageImpl<>(list);
-        given(itemService.readItemList(anyInt(), anyInt()))
+        Page<CommentResponse> result = new PageImpl<>(commentResponses);
+        given(commentService.readCommentList(anyLong(), anyInt(), anyInt()))
                 .willReturn(result);
 
         mockMvc.perform(
-                        get("/items")
+                        get("/items/{itemId}/comments", 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .param("page", "0")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("item-read-list",
+                .andDo(document("comment-read-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
@@ -144,17 +132,16 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data").type(OBJECT)
                                         .description("응답 데이터"),
                                 fieldWithPath("data.content[].id").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data.content[].title").type(STRING)
-                                        .description("상품제목"),
-                                fieldWithPath("data.content[].description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("data.content[].minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("data.content[].status").type(STRING)
-                                        .description("판매상태"),
+                                        .description("댓글 ID"),
+                                fieldWithPath("data.content[].content").type(STRING)
+                                        .description("댓글내용"),
+                                fieldWithPath("data.content[].reply").type(STRING)
+                                        .optional()
+                                        .description("답글"),
+                                fieldWithPath("data.content[].itemId").type(NUMBER)
+                                        .description("아이템 ID"),
                                 fieldWithPath("data.content[].username").type(STRING)
-                                        .description("판매자"),
+                                        .description("작성자"),
 
                                 fieldWithPath("data.last").
                                         description("마지막 페이지인지 여부"),
@@ -187,79 +174,32 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
-    @DisplayName("상품 단건 조회 API")
+    @DisplayName("댓글 수정 API")
     @Test
-    void readItemOne() throws Exception {
-        given(itemService.readItemOne(anyLong()))
-                .willReturn(createItemResponse(1L, "상품제목", 10_000, "판매자"));
-
-        mockMvc.perform(
-                        get("/items/{itemId}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document("item-read-one",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        responseFields(
-                                fieldWithPath("code").type(NUMBER)
-                                        .description("코드"),
-                                fieldWithPath("status").type(STRING)
-                                        .description("상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("메세지"),
-                                fieldWithPath("data").type(OBJECT)
-                                        .description("응답 데이터"),
-                                fieldWithPath("data.id").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data.title").type(STRING)
-                                        .description("상품제목"),
-                                fieldWithPath("data.description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("data.minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("data.status").type(STRING)
-                                        .description("판매상태"),
-                                fieldWithPath("data.username").type(STRING)
-                                        .description("판매자")
-
-                        )
-                ));
-    }
-
-    @DisplayName("상품 수정 API")
-    @Test
-    void updateItem() throws Exception {
+    void updateComment() throws Exception {
         Authentication authentication = getAuthentication();
 
-        ItemUpdateRequestDto request = ItemUpdateRequestDto.builder()
-                .title("상품제목")
-                .description("상품내용")
-                .minPriceWanted(10_000)
+        CommentUpdateRequestDto request = CommentUpdateRequestDto.builder()
+                .content("댓글수정")
                 .build();
 
-        given(itemService.updateItem(anyLong(), any(ItemUpdateRequestDto.class), anyLong()))
-                .willReturn(updateItemResponse(request.getTitle(), request.getMinPriceWanted(), request.getDescription()));
+        given(commentService.updateComment(anyLong(), anyLong(), any(CommentUpdateRequestDto.class), anyLong()))
+                .willReturn(updateCommentResponse(1L, "작성자", request.getContent(), "답글"));
 
         mockMvc.perform(
-                        put("/items/{itemId}", 1L)
+                        put("/items/{itemId}/comments/{commentId}", 1L, 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                                 .principal(authentication)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("item-update",
+                .andDo(document("comment-update",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
-                                fieldWithPath("title").type(STRING)
-                                        .description("상품이름"),
-                                fieldWithPath("description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("minPriceWanted").type(NUMBER)
-                                        .description("상품가격")
+                                fieldWithPath("content").type(STRING)
+                                        .description("댓글내용")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
@@ -271,37 +211,36 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data").type(OBJECT)
                                         .description("응답 데이터"),
                                 fieldWithPath("data.id").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data.title").type(STRING)
-                                        .description("상품제목"),
-                                fieldWithPath("data.description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("data.minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("data.status").type(STRING)
-                                        .description("판매상태"),
+                                        .description("댓글 ID"),
+                                fieldWithPath("data.content").type(STRING)
+                                        .description("댓글내용"),
                                 fieldWithPath("data.username").type(STRING)
-                                        .description("판매자")
+                                        .description("작성자"),
+                                fieldWithPath("data.itemId").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.reply").type(STRING)
+                                        .optional()
+                                        .description("답글")
                         )
                 ));
     }
 
-    @DisplayName("상품 삭제 API")
+    @DisplayName("댓글 삭제 API")
     @Test
-    void deleteItem() throws Exception {
+    void deleteComment() throws Exception {
         Authentication authentication = getAuthentication();
 
-        given(itemService.deleteItem(anyLong(), anyLong()))
-                .willReturn(deleteItemResponse("상품제목", 10_000, "상품설명"));
+        given(commentService.deleteComment(anyLong(), anyLong(), anyLong()))
+                .willReturn(createCommentResponse(1L, "작성자", "댓글내용", null));
 
         mockMvc.perform(
-                        delete("/items/{itemId}", 1L)
+                        delete("/items/{itemId}/comments/{commentId}", 1L, 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .principal(authentication)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(document("item-delete",
+                .andDo(document("comment-delete",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         responseFields(
@@ -314,18 +253,66 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("data").type(OBJECT)
                                         .description("응답 데이터"),
                                 fieldWithPath("data.id").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data.title").type(STRING)
-                                        .description("상품제목"),
-                                fieldWithPath("data.description").type(STRING)
-                                        .description("상품설명"),
-                                fieldWithPath("data.minPriceWanted").type(NUMBER)
-                                        .description("상품가격"),
-                                fieldWithPath("data.status").type(STRING)
-                                        .description("판매상태"),
+                                        .description("댓글 ID"),
+                                fieldWithPath("data.content").type(STRING)
+                                        .description("댓글내용"),
                                 fieldWithPath("data.username").type(STRING)
-                                        .description("판매자")
+                                        .description("작성자"),
+                                fieldWithPath("data.itemId").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.reply").type(STRING)
+                                        .optional()
+                                        .description("답글")
+                        )
+                ));
+    }
 
+    @DisplayName("답글 작성 API")
+    @Test
+    void createReply() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        CommentReplyRequestDto request = CommentReplyRequestDto.builder()
+                .reply("답글")
+                .build();
+
+        given(commentService.updateCommentReply(anyLong(), anyLong(), any(CommentReplyRequestDto.class), anyLong()))
+                .willReturn(createCommentResponse(1L, "작성자", "댓글내용", request.getReply()));
+
+        mockMvc.perform(
+                        put("/items/{itemId}/comments/{commentId}/reply", 1L, 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("comment-reply",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("reply").type(STRING)
+                                        .description("답글")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.id").type(NUMBER)
+                                        .description("댓글 ID"),
+                                fieldWithPath("data.content").type(STRING)
+                                        .description("댓글내용"),
+                                fieldWithPath("data.username").type(STRING)
+                                        .description("작성자"),
+                                fieldWithPath("data.itemId").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.reply").type(STRING)
+                                        .description("답글")
                         )
                 ));
     }
@@ -336,36 +323,22 @@ public class ItemControllerDocsTest extends RestDocsSupport {
         return authentication;
     }
 
-    private ItemResponse createItemResponse(final Long id, final String title, final int minPriceWanted, final String username) {
-        return ItemResponse.builder()
+    private CommentResponse createCommentResponse(final Long id, final String username, final String content, final String reply) {
+        return CommentResponse.builder()
                 .id(id)
-                .title(title)
-                .description("상품내용")
-                .status(SALE)
-                .minPriceWanted(minPriceWanted)
+                .content(content)
                 .username(username)
+                .itemId(1L)
+                .reply(reply)
                 .build();
     }
-
-    private ItemResponse updateItemResponse(final String title, final int minPriceWanted, final String description) {
-        return ItemResponse.builder()
-                .id(1L)
-                .title(title)
-                .description(description)
-                .status(SALE)
-                .minPriceWanted(minPriceWanted)
-                .username("판매자")
-                .build();
-    }
-
-    private ItemResponse deleteItemResponse(final String title, final int minPriceWanted, final String description) {
-        return ItemResponse.builder()
-                .id(1L)
-                .title(title)
-                .description(description)
-                .status(SALE)
-                .minPriceWanted(minPriceWanted)
-                .username("판매자")
+    private CommentResponse updateCommentResponse(final Long id, final String username, final String content, final String reply) {
+        return CommentResponse.builder()
+                .id(id)
+                .content(content)
+                .username(username)
+                .itemId(1L)
+                .reply(reply)
                 .build();
     }
 }
