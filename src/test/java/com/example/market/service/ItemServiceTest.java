@@ -1,215 +1,337 @@
 package com.example.market.service;
 
+import com.example.market.IntegrationTestSupport;
 import com.example.market.domain.entity.Item;
-import com.example.market.domain.entity.enums.Role;
+import com.example.market.domain.entity.enums.ItemStatus;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
-import com.example.market.dto.item.response.ItemListResponseDto;
-import com.example.market.dto.item.response.ItemOneResponseDto;
 import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+import static com.example.market.domain.entity.enums.ItemStatus.*;
+import static com.example.market.domain.entity.enums.ItemStatus.SALE;
 import static org.assertj.core.api.Assertions.*;
 
-@ActiveProfiles("test")
-@SpringBootTest
-class ItemServiceTest {
+class ItemServiceTest extends IntegrationTestSupport {
 
     @Autowired
-    ItemService itemService;
+    private ItemService itemService;
 
     @Autowired
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @Autowired
-    UserRepository userRepository;
-
-    User user;
-    User anotherUser;
-    @BeforeEach
-    void setUp() {
-        itemRepository.deleteAll();
-        user = userRepository.save(User.builder()
-                .username("아이디")
-                .password("비밀번호")
-                .role(Role.USER)
-                .build());
-        anotherUser = userRepository.save(User.builder()
-                .username("다른아이디")
-                .password("다른비밀번호")
-                .role(Role.USER)
-                .build());
-    }
+    private UserRepository userRepository;
 
     @AfterEach
     void end() {
-        itemRepository.deleteAll();
+        itemRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
     }
 
-    @DisplayName("아이템 등록 테스트")
+    @DisplayName("로그인을 한 회원이 상품을 등록한다.")
     @Test
     void createItem() {
-
         // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
+        User user = createUser();
+        userRepository.save(user);
+
+        ItemCreateRequestDto request = ItemCreateRequestDto.builder()
                 .title("제목1")
                 .description("내용1")
                 .minPriceWanted(10_000)
                 .build();
 
-        itemService.create(dto, user.getId());
-
         // when
-        List<Item> all = itemRepository.findAll();
+        ItemResponse itemResponse = itemService.create(request, user.getId());
 
         // then
-        assertThat(all.size()).isEqualTo(1);
-
+        assertThat(itemResponse.getId()).isNotNull();
+        assertThat(itemResponse)
+                .extracting("title", "description", "minPriceWanted")
+                .contains(request.getTitle(), request.getDescription(), request.getMinPriceWanted());
     }
 
-    @DisplayName("아이템 전체 조회(페이징) 테스트")
+    @DisplayName("상품을 등록할 때, 존재하지 않은 회원일 경우 예외 발생한다.")
+    @Test
+    void createItemWithNoUser() {
+        // given
+        final Long NoExistUser = 0L;
+
+        ItemCreateRequestDto request = ItemCreateRequestDto.builder()
+                .title("제목1")
+                .description("내용1")
+                .minPriceWanted(10_000)
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> itemService.create(request, NoExistUser))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 회원입니다.");
+    }
+
+    @DisplayName("등록된 아이템을 전체 조회(페이징)한다. - 판매 중, 판매 완료 모두 다 조회한다.")
     @Test
     void readItemList() {
         // given
-        Integer page = 0;
-        Integer limit = 20;
-        createItems();
+        User user = createUser();
+        userRepository.save(user);
+
+        Item item1 = createItem(user, 10_000, "제목1", "내용1", SALE);
+        Item item2 = createItem(user, 20_000, "제목2", "내용2", SALE);
+        Item item3 = createItem(user, 30_000, "제목3", "내용3", SALE);
+        Item item4 = createItem(user, 40_000, "제목4", "내용4", SOLD);
+        itemRepository.saveAll(List.of(item1, item2, item3, item4));
 
         // when
-        Page<ItemResponse> itemListDto = itemService.readItemList(page, limit);
+        Page<ItemResponse> itemResponses = itemService.readItemList(1, 20);
 
         // then
-        assertThat(itemListDto.getSize()).isEqualTo(20);
-
+        assertThat(itemResponses).hasSize(4)
+                .extracting("title", "description", "minPriceWanted")
+                .containsExactlyInAnyOrder(
+                        tuple(item1.getTitle(), item1.getDescription(), item1.getMinPriceWanted()),
+                        tuple(item2.getTitle(), item2.getDescription(), item2.getMinPriceWanted()),
+                        tuple(item3.getTitle(), item3.getDescription(), item3.getMinPriceWanted()),
+                        tuple(item4.getTitle(), item4.getDescription(), item4.getMinPriceWanted())
+                );
     }
 
-    @DisplayName("아이템 단일 조회 테스트")
+    @DisplayName("등록된 아이템을 전체 조회할 때, 등록된 아이템이 없으면 size값은 0이다.")
+    @Test
+    void readItemListWithNoItem() {
+        // when
+        Page<ItemResponse> itemResponses = itemService.readItemList(1, 20);
+
+        // then
+        assertThat(itemResponses).hasSize(0);
+    }
+
+    @DisplayName("등록된 아이템을 단일 조회한다.")
     @Test
     void readItemOne() {
         // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
+        User user = createUser();
+        userRepository.save(user);
+
+        ItemCreateRequestDto request = ItemCreateRequestDto.builder()
                 .title("제목1")
                 .description("내용1")
                 .minPriceWanted(10_000)
                 .build();
-
-        Item save = itemRepository.save(dto.toEntity(user));
-
-        // when
-        ItemResponse itemOneResponseDto = itemService.readItemOne(save.getId());
-
-        // then
-        assertThat(itemOneResponseDto.getTitle()).isEqualTo(dto.getTitle());
-    }
-
-    @DisplayName("존재하지 않는 아이템일 때 예외 발생")
-    @Test
-    void notItemException() {
-        assertThatThrownBy(() -> {
-            itemService.readItemOne(1L);
-        }).isInstanceOf(MarketAppException.class);
-    }
-
-    @DisplayName("아이템 수정 테스트(이미지X)")
-    @Test
-    void updateItem() {
-        // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
-                .title("새로운 제목")
-                .minPriceWanted(10_000)
-                .description("새로운 내용")
-                .build();
-
-        Item savedItem = itemRepository.save(dto.toEntity(user));
-
-        ItemUpdateRequestDto updateDto = ItemUpdateRequestDto.builder()
-                .title("수정된 제목")
-                .minPriceWanted(20_000)
-                .description("수정된 내용")
-                .build();
-
+        Item item = itemRepository.save(request.toEntity(user));
 
         // when
-        itemService.updateItem(savedItem.getId(), updateDto, user.getId());
-        Item updateItem = itemRepository.findById(savedItem.getId()).get();
+        ItemResponse itemResponse = itemService.readItemOne(item.getId());
 
         // then
-        assertThat(updateItem.getTitle()).isEqualTo(updateDto.getTitle());
+        assertThat(itemResponse.getId()).isNotNull();
+        assertThat(itemResponse)
+                .extracting("title", "description", "minPriceWanted", "status")
+                .contains(request.getTitle(), request.getDescription(), request.getMinPriceWanted(), request.getStatus());
     }
 
-    @DisplayName("아이템 수정 Writer or Password 틀렸을 때 예외 발생")
+    @DisplayName("아이템을 단일 조회할 때, 존재하지 않는 아이템이면 예외가 발생한다.")
     @Test
-    void updateItemDontMatchWriterOrPassword() {
+    void readItemOneWithNoItem() {
         // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
-                .title("새로운 제목")
-                .minPriceWanted(10_000)
-                .description("새로운 내용")
-                .build();
+        final Long NoExistItem = 0L;
 
-        Item savedItem = itemRepository.save(dto.toEntity(user));
+        // when // then
+        assertThatThrownBy(() -> itemService.readItemOne(NoExistItem))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 아이템입니다.");
+    }
 
-        ItemUpdateRequestDto notSameWriterUpdateDto = ItemUpdateRequestDto.builder()
+    @DisplayName("등록된 아이템을 수정한다. 이미지는 포함되지 않는다.")
+    @Test
+    void updateItemWithNoImage() {
+        // given
+        User user = createUser();
+        userRepository.save(user);
+
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
+
+        ItemUpdateRequestDto request = ItemUpdateRequestDto.builder()
                 .title("수정된 제목")
                 .minPriceWanted(20_000)
                 .description("수정된 내용")
                 .build();
 
         // when
+        ItemResponse itemResponse = itemService.updateItem(item.getId(), request, user.getId());
 
         // then
-        assertThatThrownBy(() -> {
-            itemService.updateItem(savedItem.getId(), notSameWriterUpdateDto, anotherUser.getId());
-        }).isInstanceOf(MarketAppException.class);
-
+        assertThat(itemResponse.getId()).isNotNull();
+        assertThat(itemResponse)
+                .extracting("title", "description", "minPriceWanted")
+                .contains(request.getTitle(), request.getDescription(), request.getMinPriceWanted());
     }
 
-    @DisplayName("아이템 삭제 기능 테스트")
+    @DisplayName("등록된 아이템을 수정할 때, 본인이 등록한 아이템이 아닐 때 예외가 발생한다.")
+    @Test
+    void updateItemWithNotEqualWriter() {
+        // given
+        User user = createUser();
+        User anotherUser = createUser();
+        userRepository.saveAll(List.of(user, anotherUser));
+
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
+
+        ItemUpdateRequestDto request = ItemUpdateRequestDto.builder()
+                .title("수정된 제목")
+                .minPriceWanted(20_000)
+                .description("수정된 내용")
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> itemService.updateItem(item.getId(), request, anotherUser.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("작성자 정보가 일치하지 않습니다.");
+    }
+
+    @DisplayName("등록된 아이템을 수정할 때, 존재하지 않는 아이템이면 예외가 발생한다.")
+    @Test
+    void updateItemWithNoItem() {
+        // given
+        final Long NoExistItem = 0L;
+
+        User user = createUser();
+        userRepository.save(user);
+
+        ItemUpdateRequestDto request = ItemUpdateRequestDto.builder()
+                .title("수정된 제목")
+                .minPriceWanted(20_000)
+                .description("수정된 내용")
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> itemService.updateItem(NoExistItem, request, user.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 아이템입니다.");
+    }
+
+    @DisplayName("등록된 아이템을 수정할 때, 존재하지 않는 회원이면 예외가 발생한다.")
+    @Test
+    void updateItemWithNoUser() {
+        // given
+        User user = createUser();
+        userRepository.save(user);
+
+        final Long userId = 0L;
+
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
+
+        ItemUpdateRequestDto request = ItemUpdateRequestDto.builder()
+                .title("수정된 제목")
+                .minPriceWanted(20_000)
+                .description("수정된 내용")
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> itemService.updateItem(item.getId(), request, userId))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 회원입니다.");
+    }
+
+    @DisplayName("등록된 아이템을 삭제한다.")
     @Test
     void deleteItem() {
         // given
-        ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
-                .title("새로운 제목")
-                .minPriceWanted(10_000)
-                .description("새로운 내용")
-                .build();
+        User user = createUser();
+        userRepository.save(user);
 
-        Item savedItem = itemRepository.save(dto.toEntity(user));
-
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
 
         // when
-        itemService.deleteItem(savedItem.getId(), user.getId());
+        ItemResponse itemResponse = itemService.deleteItem(item.getId(), user.getId());
 
         // then
-        List<Item> all = itemRepository.findAll();
-        assertThat(all.size()).isEqualTo(0);
+        assertThatThrownBy(() -> itemService.readItemOne(item.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 아이템입니다.");
     }
 
-    private void createItems() {
-        for (int i = 1; i <= 30; i++) {
-            ItemCreateRequestDto dto = ItemCreateRequestDto.builder()
-                    .title("제목" + i)
-                    .description("내용" + i)
-                    .minPriceWanted(i)
-                    .build();
+    @DisplayName("등록된 아이템을 삭제할 때, 존재하지 않는 아이템이면 예외가 발생한다.")
+    @Test
+    void deleteItemWithNoItem() {
+        // given
+        User user = createUser();
+        userRepository.save(user);
 
-            itemService.create(dto, user.getId());
-        }
+        final Long itemId = 0L;
+
+        // when // then
+        assertThatThrownBy(() -> itemService.deleteItem(itemId, user.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 아이템입니다.");
+    }
+
+    @DisplayName("등록된 아이템을 삭제할 때, 존재하지 않는 회원이면 예외가 발생한다.")
+    @Test
+    void deleteItemWithNoUser() {
+        // given
+        User user = createUser();
+        userRepository.save(user);
+
+        final Long userId = 0L;
+
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
+
+        // when // then
+        assertThatThrownBy(() -> itemService.deleteItem(item.getId(), userId))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("존재하지 않는 회원입니다.");
+    }
+
+    @DisplayName("등록된 아이템을 삭제할 때, 본인이 등록한 아이템이 아니면 예외가 발생한다.")
+    @Test
+    void deleteItemWithNotEqualWriter() {
+        // given
+        User user = createUser();
+        User anotherUser = createUser();
+        userRepository.saveAll(List.of(user, anotherUser));
+
+        Item item = createItem(user, 10_000, "제목", "내용", SALE);
+        itemRepository.save(item);
+
+        // when // then
+        assertThatThrownBy(() -> itemService.deleteItem(item.getId(), anotherUser.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("작성자 정보가 일치하지 않습니다.");
+    }
+
+    private User createUser() {
+        return User.builder()
+                .username("아이디")
+                .password("비밀번호")
+                .build();
+    }
+
+    private Item createItem(final User user, final int price, final String title, final String description, final ItemStatus status) {
+        return Item.builder()
+                .title(title)
+                .description(description)
+                .minPriceWanted(price)
+                .status(SALE)
+                .user(user)
+                .status(status)
+                .build();
     }
 
 }
