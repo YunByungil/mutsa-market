@@ -38,17 +38,17 @@ public class ItemService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ItemResponse create(ItemCreateRequestDto dto, Long userId) {
+    public ItemResponse create(final ItemCreateRequestDto request, final Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
-        Item item = itemRepository.save(dto.toEntity(user));
+        Item item = itemRepository.save(request.toEntity(user));
 
         return ItemResponse.of(item);
     }
 
-    public Page<ItemResponse> readItemList(int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
+    public Page<ItemResponse> readItemList(final int page, final int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
         Page<Item> itemList = itemRepository.findAll(pageable);
 
         Page<ItemResponse> result = itemList.map(ItemResponse::of);
