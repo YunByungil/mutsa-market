@@ -35,7 +35,7 @@ public class ItemController {
     }
 
     @GetMapping("/items")
-    public ApiResponse<Page<ItemResponse>> readItemList(@RequestParam(value = "page", defaultValue = "0") Integer page,
+    public ApiResponse<Page<ItemResponse>> readItemList(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                                   @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
 
         return ApiResponse.ok(itemService.readItemList(page, limit));
