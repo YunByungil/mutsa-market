@@ -69,7 +69,7 @@ public class ItemService {
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
         if (!item.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
