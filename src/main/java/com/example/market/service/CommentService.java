@@ -37,21 +37,20 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CommentResponse create(Long itemId, CommentCreateRequestDto dto, Long userId) {
+    public CommentResponse create(final Long itemId, final CommentCreateRequestDto request, final Long userId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() ->
-                        new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
-        Comment comment = commentRepository.save(dto.toEntity(item, user));
+        Comment comment = commentRepository.save(request.toEntity(item, user));
 
         return CommentResponse.of(comment);
     }
 
-    public Page<CommentResponse> readCommentList(Long itemId, int page, int limit) {
-        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
+    public Page<CommentResponse> readCommentList(final Long itemId, final int page, final int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").ascending());
 
         Page<Comment> findCommentByAllItemId = commentRepository.findAllByItemId(itemId, pageable);
 
@@ -61,16 +60,17 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse updateComment(Long itemId, Long commentId, CommentUpdateRequestDto dto, Long userId) {
+    public CommentResponse updateComment(final Long itemId, final Long commentId, final CommentUpdateRequestDto dto, final Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_COMMENT, NOT_FOUND_COMMENT.getMessage()));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (comment.getUser().getId() != user.getId()) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        if (comment.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
@@ -79,16 +79,17 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse deleteComment(Long itemId, Long commentId, Long userId) {
+    public CommentResponse deleteComment(final Long itemId, final Long commentId, final Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_COMMENT, NOT_FOUND_COMMENT.getMessage()));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (comment.getUser().getId() != user.getId()) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        if (comment.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
@@ -97,16 +98,17 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse updateCommentReply(Long itemId, Long commentId, CommentReplyRequestDto replyDto, Long userId) {
+    public CommentResponse updateCommentReply(final Long itemId, final Long commentId, final CommentReplyRequestDto replyDto, final Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_COMMENT, NOT_FOUND_COMMENT.getMessage()));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (item.getUser().getId() != user.getId()) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        if (item.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
