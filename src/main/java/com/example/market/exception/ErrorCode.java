@@ -17,7 +17,10 @@ public enum ErrorCode {
     SERVER_ERROR(ResultCode.INTERNAL_SERVER_ERROR, "서버 에러가 발생했습니다."),
 
     ALREADY_USER_USERNAME(ResultCode.CONFLICT, "이미 존재하는 회원입니다."),
-    ALREADY_USER_NEGOTIATION(ResultCode.CONFLICT, "이미 제안을 요청했습니다.");
+    ALREADY_USER_NEGOTIATION(ResultCode.CONFLICT, "이미 제안을 요청했습니다."),
+    ALREADY_ITEM_SOLD(ResultCode.CONFLICT, "이미 판매된 상품입니다."),
+
+    CANNOT_NEGOTIATION_OWN_ITEM(ResultCode.FORBIDDEN, "본인 상품에는 제안을 할 수 없습니다.");
 
     private ResultCode resultCode;
     private String message;
