@@ -70,7 +70,7 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
-        if (comment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
@@ -89,7 +89,7 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
-        if (comment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
@@ -108,7 +108,7 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
 
-        if (item.getUser().getId().equals(user.getId())) {
+        if (!item.getUser().getId().equals(user.getId())) {
             throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
         }
 
