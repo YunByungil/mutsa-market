@@ -50,7 +50,7 @@ public class CommentService {
     }
 
     public Page<CommentResponse> readCommentList(final Long itemId, final int page, final int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").ascending());
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").ascending());
 
         Page<Comment> findCommentByAllItemId = commentRepository.findAllByItemId(itemId, pageable);
 

@@ -94,7 +94,7 @@ class ItemServiceTest extends IntegrationTestSupport {
         itemRepository.saveAll(List.of(item1, item2, item3, item4));
 
         // when
-        Page<ItemResponse> itemResponses = itemService.readItemList(1, 20);
+        Page<ItemResponse> itemResponses = itemService.readItemList(0, 20);
 
         // then
         assertThat(itemResponses).hasSize(4)

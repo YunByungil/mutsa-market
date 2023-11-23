@@ -48,7 +48,7 @@ public class ItemService {
     }
 
     public Page<ItemResponse> readItemList(final int page, final int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
         Page<Item> itemList = itemRepository.findAll(pageable);
 
         Page<ItemResponse> result = itemList.map(ItemResponse::of);

@@ -157,7 +157,7 @@ class NegotiationServiceTest extends IntegrationTestSupport {
         negotiationRepository.saveAll(List.of(negotiation1, negotiation2));
 
         // when
-        Page<NegotiationResponse> negotiations = negotiationService.getReceivedNegotiationItems(seller.getId(), 1);
+        Page<NegotiationResponse> negotiations = negotiationService.getReceivedNegotiationItems(seller.getId(), 0);
 
         // then
         assertThat(negotiations).hasSize(2)
@@ -187,7 +187,7 @@ class NegotiationServiceTest extends IntegrationTestSupport {
         negotiationRepository.saveAll(List.of(negotiation1, negotiation2, negotiation3));
 
         // when
-        Page<NegotiationResponse> negotiations = negotiationService.getSentNegotiationItems(buyer.getId(), 1);
+        Page<NegotiationResponse> negotiations = negotiationService.getSentNegotiationItems(buyer.getId(), 0);
 
         // then
         assertThat(negotiations).hasSize(3)

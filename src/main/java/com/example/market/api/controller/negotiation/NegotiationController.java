@@ -34,14 +34,14 @@ public class NegotiationController {
 
     @GetMapping("/items/received/proposals")
     public ApiResponse<Page<NegotiationResponse>> getReceivedNegotiationItems(final Authentication authentication,
-                                                                              @RequestParam(value = "page", defaultValue = "1") int page) {
+                                                                              @RequestParam(value = "page", defaultValue = "0") int page) {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(negotiationService.getReceivedNegotiationItems(userId, page));
     }
 
     @GetMapping("/items/sent/proposals")
     public ApiResponse<Page<NegotiationResponse>> getSentNegotiationItems(final Authentication authentication,
-                                                                          @RequestParam(value = "page", defaultValue = "1") int page) {
+                                                                          @RequestParam(value = "page", defaultValue = "0") int page) {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(negotiationService.getSentNegotiationItems(userId, page));
     }
