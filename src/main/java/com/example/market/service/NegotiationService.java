@@ -3,12 +3,9 @@ package com.example.market.service;
 import com.example.market.domain.entity.Item;
 import com.example.market.domain.entity.Negotiation;
 import com.example.market.domain.entity.enums.ItemStatus;
-import com.example.market.domain.entity.enums.NegotiationStatus;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.negotiation.request.*;
-import com.example.market.dto.negotiation.response.NegotiationListResponseDto;
 import com.example.market.dto.negotiation.response.NegotiationResponse;
-import com.example.market.dto.negotiation.response.NegotiationResponseDto;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.NegotiationRepository;
@@ -16,14 +13,12 @@ import com.example.market.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import static com.example.market.common.SystemMessage.*;
 import static com.example.market.exception.ErrorCode.*;
 
 @RequiredArgsConstructor
@@ -36,14 +31,20 @@ public class NegotiationService {
     private final UserRepository userRepository;
 
     @Transactional
-    public NegotiationResponse createNegotiation(Long itemId, NegotiationCreateRequestDto dto, Long userId) {
+    public NegotiationResponse createNegotiation(final Long itemId, final NegotiationCreateRequestDto request, final Long buyerId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
-        User buyer = userRepository.findById(userId)
+
+        User buyer = userRepository.findById(buyerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Negotiation negotiation = negotiationRepository.save(dto.toEntity(item, buyer, item.getUser()));
-        // TODO: 중복 신청 X 로직 추가
+        validateDuplicateNegotiation(itemId, buyerId);
+
+        validateItemStatusIsSold(item);
+
+        validateCannotNegotiateOwnItem(buyerId, item);
+
+        Negotiation negotiation = negotiationRepository.save(request.toEntity(item, buyer, item.getUser()));
 
         return NegotiationResponse.of(negotiation);
     }
@@ -61,7 +62,7 @@ public class NegotiationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
         Page<Negotiation> negotiations = negotiationRepository.
-                findAllBySellerId(userId, PageRequest.of(page - 1, 20, Sort.by("id").ascending()));
+                findAllByBuyerId(userId, PageRequest.of(page - 1, 20, Sort.by("id").ascending()));
 
         return negotiations.map(NegotiationResponse::of);
     }
@@ -79,4 +80,23 @@ public class NegotiationService {
 //
 //        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 //    }
+
+    private void validateCannotNegotiateOwnItem(final Long buyerId, final Item item) {
+        if (item.getUser().getId().equals(buyerId)) {
+            throw new MarketAppException(CANNOT_NEGOTIATION_OWN_ITEM, CANNOT_NEGOTIATION_OWN_ITEM.getMessage());
+        }
+    }
+
+    private void validateItemStatusIsSold(final Item item) {
+        if (item.getStatus().equals(ItemStatus.SOLD)) {
+            throw new MarketAppException(ALREADY_ITEM_SOLD, ALREADY_ITEM_SOLD.getMessage());
+        }
+    }
+
+    private void validateDuplicateNegotiation(final Long itemId, final Long buyerId) {
+        negotiationRepository.findByItemIdAndBuyerId(itemId, buyerId)
+                .ifPresent(negotiation -> {
+                    throw new MarketAppException(ALREADY_USER_NEGOTIATION, ALREADY_USER_NEGOTIATION.getMessage());
+                });
+    }
 }

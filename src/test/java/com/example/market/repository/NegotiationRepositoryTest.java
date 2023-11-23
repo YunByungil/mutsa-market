@@ -25,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,6 +101,45 @@ class NegotiationRepositoryTest {
                         tuple(item2, seller, buyer1),
                         tuple(item3, seller, buyer1)
                 );
+    }
+
+    @DisplayName("등록된 아이템에 내가 가격 제안을 보냈는지 확인한다. 응답값 Optional로 제안 존재 여부를 확인한다.")
+    @Test
+    void findByItemIdAndBuyerId() {
+        // given
+        User seller = createSeller("seller");
+        User buyer = createBuyer("buyer1");
+        userRepository.saveAll(List.of(seller, buyer));
+
+        Item item = createItem(seller);
+        itemRepository.save(item);
+
+        Negotiation negotiation = createNegotiation(seller, buyer, item);
+        negotiationRepository.save(negotiation);
+
+        // when
+        Optional<Negotiation> findNegotiation = negotiationRepository.findByItemIdAndBuyerId(item.getId(), buyer.getId());
+
+        // then
+        assertThat(findNegotiation).isNotEmpty();
+    }
+
+    @DisplayName("등록된 아이템에 내가 가격 제안을 보냈는지 확인한다. 보낸 제안이 없으면 응답값은 isEmpty()다.")
+    @Test
+    void findByItemIdAndBuyerIdWithNoNegotiation() {
+        // given
+        final Long noExistUser = 0L;
+        User seller = createSeller("seller");
+        userRepository.save(seller);
+
+        Item item = createItem(seller);
+        itemRepository.save(item);
+
+        // when
+        Optional<Negotiation> findNegotiation = negotiationRepository.findByItemIdAndBuyerId(item.getId(), noExistUser);
+
+        // then
+        assertThat(findNegotiation).isEmpty();
     }
 
 //    @DisplayName("findAllByItemId() 메소드 테스트")
