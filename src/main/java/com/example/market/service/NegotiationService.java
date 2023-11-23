@@ -53,7 +53,7 @@ public class NegotiationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
         Page<Negotiation> negotiations = negotiationRepository.
-                findAllBySellerId(userId, PageRequest.of(page - 1, 20, Sort.by("id").ascending()));
+                findAllBySellerId(userId, PageRequest.of(page, 20, Sort.by("id").ascending()));
 
         return negotiations.map(NegotiationResponse::of);
     }
@@ -62,7 +62,7 @@ public class NegotiationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
         Page<Negotiation> negotiations = negotiationRepository.
-                findAllByBuyerId(userId, PageRequest.of(page - 1, 20, Sort.by("id").ascending()));
+                findAllByBuyerId(userId, PageRequest.of(page, 20, Sort.by("id").ascending()));
 
         return negotiations.map(NegotiationResponse::of);
     }

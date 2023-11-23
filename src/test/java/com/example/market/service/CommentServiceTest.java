@@ -125,7 +125,7 @@ class CommentServiceTest extends IntegrationTestSupport {
         commentRepository.saveAll(List.of(comment1, comment2, comment3));
 
         // when
-        Page<CommentResponse> commentResponses = commentService.readCommentList(item.getId(), 1, 5);
+        Page<CommentResponse> commentResponses = commentService.readCommentList(item.getId(), 0, 5);
 
         // then
         assertThat(commentResponses).hasSize(3)
