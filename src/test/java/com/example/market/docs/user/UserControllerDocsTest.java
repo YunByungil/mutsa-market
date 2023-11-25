@@ -3,6 +3,7 @@ package com.example.market.docs.user;
 import com.example.market.api.controller.user.UserController;
 import com.example.market.docs.RestDocsSupport;
 import com.example.market.domain.entity.user.Address;
+import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
@@ -44,6 +45,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .userImage("profile.jpg")
                 .phoneNumber("010-1234-5678")
                 .address(new Address("고양시", "일산서구", "12345"))
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         given(userService.createUser(any(UserCreateRequestDto.class)))
@@ -88,7 +90,11 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("우편번호"),
                                 fieldWithPath("userImage").type(STRING)
                                         .optional()
-                                        .description("이미지")
+                                        .description("이미지"),
+                                fieldWithPath("coordinate.lat").type(NUMBER)
+                                        .description("위도값"),
+                                fieldWithPath("coordinate.lng").type(NUMBER)
+                                        .description("경도값")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
