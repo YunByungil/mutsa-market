@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(columnDefinition = "POINT SRID 4326")
+    private Point location;
+
+    @Enumerated(EnumType.STRING)
+    private SearchScope searchScope = SearchScope.NORMAL;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Item> items = new ArrayList<>();
 
@@ -41,7 +48,7 @@ public class User {
 
     @Builder
     public User(String username, String password, String phoneNumber, String email, String nickname,
-                Address address, String userImage, Role role) {
+                Address address, String userImage, Role role, final Point location) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -50,5 +57,6 @@ public class User {
         this.address = address;
         this.userImage = userImage;
         this.role = role;
+        this.location = location;
     }
 }

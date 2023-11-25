@@ -2,12 +2,18 @@ package com.example.market.dto.user.request;
 
 import com.example.market.domain.entity.enums.Role;
 import com.example.market.domain.entity.user.Address;
+import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -24,9 +30,12 @@ public class UserCreateRequestDto {
     private Address address;
     private String userImage;
 
+    @NotNull(message = "좌표는 필수로 입력해야 됩니다.")
+    private Coordinate coordinate;
+
     @Builder
     public UserCreateRequestDto(String username, String password, String phoneNumber, String email,
-                                String nickname, Address address, String userImage) {
+                                String nickname, Address address, String userImage, final Coordinate coordinate) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -34,9 +43,10 @@ public class UserCreateRequestDto {
         this.nickname = nickname;
         this.address = address;
         this.userImage = userImage;
+        this.coordinate = coordinate;
     }
 
-    public User toEntity(String password) {
+    public User toEntity(final String password) {
         return User.builder()
                 .username(username)
                 .password(password)
@@ -46,6 +56,12 @@ public class UserCreateRequestDto {
                 .address(address)
                 .userImage(userImage)
                 .role(Role.USER)
+                .location(createPoint(coordinate))
                 .build();
+    }
+
+    private static Point createPoint(final Coordinate coordinate) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLat(), coordinate.getLng()));
     }
 }
