@@ -3,6 +3,7 @@ package com.example.market.controller.user;
 import com.example.market.ControllerTestSupport;
 import com.example.market.domain.entity.Comment;
 import com.example.market.domain.entity.user.Address;
+import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.repository.CommentRepository;
@@ -54,6 +55,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
                 .username("아이디")
                 .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -76,6 +78,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
 //                .username("아이디")
                 .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -100,6 +103,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
                 .username("아이디")
 //                .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -113,6 +117,31 @@ class UserControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("비밀번호는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원가입할 때 좌표값을 꼭 입력해야 한다.")
+    @Test
+    @WithMockUser
+    void createUserWithEmptyLat() throws Exception {
+        // given
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
+                .username("아이디")
+                .password("비밀번호")
+//                .coordinate(new Coordinate(37.1, 127.1))
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("좌표는 필수로 입력해야 됩니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 }
