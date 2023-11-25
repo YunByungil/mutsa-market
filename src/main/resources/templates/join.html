@@ -2,20 +2,31 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <script type="text/javascript"
+            src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tgncwghtk8&submodules=geocoder"></script>
     <title>회원 가입</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
-
     <style>
         .gradient-custom {
             background: linear-gradient(to right, rgba(254, 238, 229, 1), rgba(229, 193, 197, 1))
         }
     </style>
 </head>
+
+
 <body class="gradient-custom">
+
+<div id="map" style="width:50%;height:400px;"></div>
+<button id="center-me" type="button">나를 중심으로 이동</button>
+<button id="find-route" type="button">경로 구하기</button>
+
 <section class="d-flex vh-100">
     <div class="container-fluid row justify-content-center align-content-center">
         <div class="card bg-dark" style="border-radius: 1rem;">
             <div class="card-body p-5 text-center">
+
                 <h2 class="text-white">SIGN UP</h2>
                 <p class="text-white-50 mt-2 mb-5">서비스 사용을 위한 회원 가입</p>
 
@@ -42,23 +53,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label text-white">우편번호</label>
-                            <input type="text" class="form-control" id="sample6_postcode" placeholder="우편번호" name="zipcode">
-                            <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기">
+                            <label class="form-label text-white">위도</label>
+                            <input type="text" class="form-control" id="lat" name="lat" placeholder="주소" readonly>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label text-white">주소</label>
-                            <input type="text" class="form-control" id="sample6_address" placeholder="주소">
+                            <label class="form-label text-white">경도</label>
+                            <input type="text" class="form-control" id="lng" name="lng" placeholder="주소" readonly>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white">Address</label>
-                            <input type="text" class="form-control" id="sample6_detailAddress" placeholder="상세주소">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white">참고항목</label>
-                            <input type="text" class="form-control" id="sample6_extraAddress" placeholder="참고항목">
-                        </div>
+
+                        <input type="hidden" id="coordinate" readonly>
 
                         <div class="d-grid">
                             <button class="btn btn-primary btn-lg" id="sign-in-button" type="submit">Submit</button>
@@ -70,74 +74,88 @@
     </div>
 </section>
 
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
 <script>
-    function sample6_execDaumPostcode() {
-        new daum.Postcode({
-            oncomplete: function(data) {
-                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+    let position = new naver.maps.LatLng(37.3595704, 127.105399)
+    let mapOptions = {
+        center: position,
+        zoom: 15,
+        zoomControl: true, //줌 컨트롤의 표시 여부
+        zoomControlOptions: { //줌 컨트롤의 옵션
+            position: naver.maps.Position.TOP_RIGHT
+        }
+    };
 
-                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
-                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
-                var addr = ''; // 주소 변수
-                var extraAddr = ''; // 참고항목 변수
+    let map = new naver.maps.Map('map', mapOptions);
 
-                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
-                    addr = data.roadAddress;
-                } else { // 사용자가 지번 주소를 선택했을 경우(J)
-                    addr = data.jibunAddress;
-                }
+    let markers = [];
+    naver.maps.Event.addListener(map, 'click', function (e) {
+        // marker.setPosition(e.coord);
+        if (markers.length === 1) {
+            markers.forEach(marker => {
+                marker.setMap(null)
+            })
+            markers.length = 0
+        } else {
+            markers.push(new naver.maps.Marker({
+                position: e.coord,
+                map: map
+            }))
+        }
+    });
 
-                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
-                if(data.userSelectedType === 'R'){
-                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
-                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
-                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-                        extraAddr += data.bname;
-                    }
-                    // 건물명이 있고, 공동주택일 경우 추가한다.
-                    if(data.buildingName !== '' && data.apartment === 'Y'){
-                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-                    }
-                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
-                    if(extraAddr !== ''){
-                        extraAddr = ' (' + extraAddr + ')';
-                    }
-                    // 조합된 참고항목을 해당 필드에 넣는다.
-                    document.getElementById("sample6_extraAddress").value = extraAddr;
+    document.getElementById("center-me").addEventListener("click", () => {
+        getLocation()
+    })
 
-                } else {
-                    document.getElementById("sample6_extraAddress").value = '';
-                }
-
-                // 우편번호와 주소 정보를 해당 필드에 넣는다.
-                document.getElementById('sample6_postcode').value = data.zonecode;
-                document.getElementById("sample6_address").value = addr;
-                // 커서를 상세주소 필드로 이동한다.
-                document.getElementById("sample6_detailAddress").focus();
-            }
-        }).open();
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(centerMap);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
     }
+
+    function centerMap(position) {
+        const naverPoint = new naver.maps.LatLng(position.coords.latitude, position.coords.longitude)
+        map.setCenter(naverPoint);
+    }
+
+    let polyline = null;
+    document.getElementById("find-route").addEventListener("click", () => {
+        if (markers.length !== 1) {
+            alert("지점을 선택하세요")
+        } else {
+            if (polyline !== null) polyline.setMap(null)
+            const latAndLng = markers[0].getPosition()
+            document.getElementById('lat').value = latAndLng.lat();
+            document.getElementById('lng').value = latAndLng.lng();
+        }
+    })
 
     document.getElementById("sign-in-form").addEventListener("submit", e => {
         e.preventDefault();
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
+        const latAndLng = markers[0].getPosition()
         fetch("/join", {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({username, password})
+            body: JSON.stringify({
+                username,
+                password,
+                coordinate: {
+                    lat: latAndLng.lat(),
+                    lng: latAndLng.lng()
+                }
+            })
         }).then(response => {
-            console.log('hi')
             console.log(response.status)
             if (response.ok) response.json().then(body => {
                 console.log(body)
                 location.href = 'http://localhost:8080/views/login'
-                // location.href = "http://localhost:8080/token/val?token=" + body.data.accessToken
-                // location.href = "http://localhost:8080/views/login?userId=" + body.userId
             })
         })
     })
