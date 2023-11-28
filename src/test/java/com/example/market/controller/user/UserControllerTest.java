@@ -3,8 +3,10 @@ package com.example.market.controller.user;
 import com.example.market.ControllerTestSupport;
 import com.example.market.domain.entity.Comment;
 import com.example.market.domain.entity.user.Address;
+import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
+import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
 import com.example.market.repository.CommentRepository;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.user.UserRepository;
@@ -35,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
@@ -54,6 +57,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
                 .username("아이디")
                 .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -76,6 +80,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
 //                .username("아이디")
                 .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -100,6 +105,7 @@ class UserControllerTest extends ControllerTestSupport {
         UserCreateRequestDto request = UserCreateRequestDto.builder()
                 .username("아이디")
 //                .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         // when // then
@@ -113,6 +119,79 @@ class UserControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("비밀번호는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원가입할 때 좌표값을 꼭 입력해야 한다.")
+    @Test
+    @WithMockUser
+    void createUserWithEmptyLat() throws Exception {
+        // given
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
+                .username("아이디")
+                .password("비밀번호")
+//                .coordinate(new Coordinate(37.1, 127.1))
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("좌표는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("좌표를 수정한다.")
+    @Test
+    void updateCoordinate() throws Exception {
+        // given
+        final Coordinate coordinate = Coordinate.builder()
+                .lat(37.1234)
+                .lng(127.1234)
+                .build();
+
+        UserUpdateCoordinateRequest request = UserUpdateCoordinateRequest.builder()
+                .coordinate(coordinate)
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/coordinate").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("좌표를 수정할 때, 위도와 경도(Coordinate) 값은 꼭 입력해야 한다.")
+    @Test
+    void updateCoordinateWithEmptyLatOrLng() throws Exception {
+        // given
+        UserUpdateCoordinateRequest request = UserUpdateCoordinateRequest.builder()
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/coordinate").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("좌표는 필수로 입력해야 합니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 }

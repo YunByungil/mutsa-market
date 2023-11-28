@@ -3,20 +3,26 @@ package com.example.market.docs.user;
 import com.example.market.api.controller.user.UserController;
 import com.example.market.docs.RestDocsSupport;
 import com.example.market.domain.entity.user.Address;
+import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.dto.user.request.UserCreateRequestDto;
+import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.service.user.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.core.Authentication;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -44,6 +50,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .userImage("profile.jpg")
                 .phoneNumber("010-1234-5678")
                 .address(new Address("고양시", "일산서구", "12345"))
+                .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
         given(userService.createUser(any(UserCreateRequestDto.class)))
@@ -88,7 +95,11 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("우편번호"),
                                 fieldWithPath("userImage").type(STRING)
                                         .optional()
-                                        .description("이미지")
+                                        .description("이미지"),
+                                fieldWithPath("coordinate.lat").type(NUMBER)
+                                        .description("위도값"),
+                                fieldWithPath("coordinate.lng").type(NUMBER)
+                                        .description("경도값")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
@@ -107,5 +118,64 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("비밀번호")
                         )
                 ));
+    }
+
+    @DisplayName("좌표 변경 API")
+    @Test
+    void updateCoordinate() throws Exception {
+        // given
+        Authentication authentication = getAuthentication();
+
+        UserUpdateCoordinateRequest request = UserUpdateCoordinateRequest.builder()
+                .coordinate(new Coordinate(37.1234, 127.1234))
+                .build();
+
+        given(userService.updateCoordinate(anyLong(), any(UserUpdateCoordinateRequest.class)))
+                .willReturn(UserResponse.builder()
+                        .id(1L)
+                        .username("아이디")
+                        .password("비밀번호")
+                        .build());
+
+        mockMvc.perform(
+                        put("/coordinate")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("user-update-coordinate",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("coordinate.lat").type(NUMBER)
+                                        .description("위도값"),
+                                fieldWithPath("coordinate.lng").type(NUMBER)
+                                        .description("경도값")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.id").type(NUMBER)
+                                        .description("회원 ID"),
+                                fieldWithPath("data.username").type(STRING)
+                                        .description("아이디"),
+                                fieldWithPath("data.password").type(STRING)
+                                        .description("비밀번호")
+                        )
+                ));
+    }
+
+    private Authentication getAuthentication() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getName()).thenReturn("1");
+        return authentication;
     }
 }

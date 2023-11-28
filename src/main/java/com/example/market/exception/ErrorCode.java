@@ -20,7 +20,9 @@ public enum ErrorCode {
     ALREADY_USER_NEGOTIATION(ResultCode.CONFLICT, "이미 제안을 요청했습니다."),
     ALREADY_ITEM_SOLD(ResultCode.CONFLICT, "이미 판매된 상품입니다."),
 
-    CANNOT_NEGOTIATION_OWN_ITEM(ResultCode.FORBIDDEN, "본인 상품에는 제안을 할 수 없습니다.");
+    CANNOT_NEGOTIATION_OWN_ITEM(ResultCode.FORBIDDEN, "본인 상품에는 제안을 할 수 없습니다."),
+
+    NOT_FOUND_COORDINATE(ResultCode.INVALID_ARGUMENT, "좌표값이 제대로 입력되지 않았습니다.");
 
     private ResultCode resultCode;
     private String message;

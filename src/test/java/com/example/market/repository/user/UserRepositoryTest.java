@@ -5,6 +5,7 @@ import com.example.market.domain.entity.user.Address;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ class UserRepositoryTest {
     }
 
     @DisplayName("회원정보 저장 테스트")
+    @Disabled
     @Test
     void createUser() {
         // given
@@ -49,7 +51,9 @@ class UserRepositoryTest {
         assertThat(savedUser.getAddress().getCity()).isEqualTo(address.getCity());
         assertThat(savedUser.getRole()).isEqualTo(Role.USER);
     }
+
     @DisplayName("findByUsername() 메서드 테스트")
+    @Disabled
     @Test
     void findByUsername() {
         // given

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-@Table(name = "sales_item")
+//@Table(name = "sales_item")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity

@@ -18,3 +18,13 @@ include::{snippets}/user-login/request-fields.adoc[]
 ==== HTTP Response
 include::{snippets}/user-login/http-response.adoc[]
 include::{snippets}/user-login/response-fields.adoc[]
+
+=== 좌표 수정
+
+==== HTTP Request
+include::{snippets}/user-update-coordinate/http-request.adoc[]
+include::{snippets}/user-update-coordinate/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/user-update-coordinate/http-response.adoc[]
+include::{snippets}/user-update-coordinate/response-fields.adoc[]

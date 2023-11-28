@@ -5,10 +5,10 @@ spring:
 #    init:
 #      mode: always
   datasource:
-    url: jdbc:h2:mem:~/market;
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://127.0.0.1:3306/market
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
 #    defer-datasource-initialization: true
@@ -19,8 +19,14 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 1000
+        dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
-#
+
+ncp:
+  api:
+    client-id: ${NCP-ID}
+    client-secret: ${NPC-SECRET}
+
 #spring:
 #  profiles:
 #    default: local
@@ -79,3 +85,8 @@ spring:
 
 jwt:
   secret: aaaabbbsdifqbvaesoioegwaaaabbbsdidsfdsfdfsdfsdfsdfsdfsd
+
+ncp:
+  api:
+    client-id: ${NCP-ID}
+    client-secret: ${NPC-SECRET}
