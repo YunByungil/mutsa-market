@@ -3,12 +3,15 @@ package com.example.market.domain.entity.user;
 import com.example.market.domain.entity.Comment;
 import com.example.market.domain.entity.Item;
 import com.example.market.domain.entity.enums.Role;
+import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,5 +61,9 @@ public class User {
         this.userImage = userImage;
         this.role = role;
         this.location = location;
+    }
+
+    public void updateCoordinate(final Point point) {
+        this.location = point;
     }
 }

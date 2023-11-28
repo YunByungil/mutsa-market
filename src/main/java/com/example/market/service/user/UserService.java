@@ -3,13 +3,16 @@ package com.example.market.service.user;
 import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
+import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.exception.ErrorCode;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,17 @@ public class UserService {
         return UserResponse.of(savedUser);
     }
 
+    public UserResponse updateCoordinate(final Long userId, final UserUpdateCoordinateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        validateLatAndLng(request.getCoordinate());
+
+        user.updateCoordinate(createPoint(request.getCoordinate()));
+
+        return UserResponse.of(user);
+    }
+
     private void validateDuplicateUsername(String username) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
@@ -46,5 +60,10 @@ public class UserService {
         if (coordinate.getLat() == null || coordinate.getLng() == null) {
             throw new MarketAppException(NOT_FOUND_COORDINATE, NOT_FOUND_COORDINATE.getMessage());
         }
+    }
+
+    private static Point createPoint(final Coordinate coordinate) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLat(), coordinate.getLng()));
     }
 }
