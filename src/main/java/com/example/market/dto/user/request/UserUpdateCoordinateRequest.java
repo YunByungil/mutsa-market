@@ -1,6 +1,7 @@
 package com.example.market.dto.user.request;
 
 import com.example.market.domain.entity.user.Coordinate;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,16 +14,12 @@ import org.locationtech.jts.geom.PrecisionModel;
 @Getter
 public class UserUpdateCoordinateRequest {
 
+    @NotNull(message = "좌표는 필수로 입력해야 합니다.")
     private Coordinate coordinate;
 
     @Builder
     public UserUpdateCoordinateRequest(final Coordinate coordinate) {
         this.coordinate = coordinate;
-    }
-
-    private static Point createPoint(final Coordinate coordinate) {
-        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLat(), coordinate.getLng()));
     }
 
 }
