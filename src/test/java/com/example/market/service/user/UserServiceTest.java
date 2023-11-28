@@ -5,6 +5,7 @@ import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserLoginRequest;
+import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.user.UserRepository;
@@ -111,6 +112,69 @@ class UserServiceTest extends IntegrationTestSupport {
                     // when // then
                     assertThatThrownBy(() -> {
                         userService.createUser(createDto);
+                    }).isInstanceOf(MarketAppException.class);
+                })
+        );
+    }
+
+    @DisplayName("내 좌표 정보를 수정한다.")
+    @Test
+    void updateCoordinate() {
+        // given
+        final String username = "아이디";
+        final String password = "비밀번호";
+        final Coordinate coordinate = new Coordinate(37.1, 127.1);
+        UserCreateRequestDto createDto = createUserRequest(username, password, coordinate);
+        User savedUser = userRepository.save(createDto.toEntity(password));
+
+        UserUpdateCoordinateRequest request = UserUpdateCoordinateRequest.builder()
+                .coordinate(new Coordinate(37.1234, 127.1234))
+                .build();
+
+        // when
+        UserResponse userResponse = userService.updateCoordinate(savedUser.getId(), request);
+
+        // then
+        assertThat(userResponse).isNotNull();
+    }
+
+    @DisplayName("내 좌표 정보를 수정할 때, 위도(Lat)값 또는 경도(Lng)값이 존재하지 않으면 예외가 발생한다.")
+    @TestFactory
+    Collection<DynamicTest> updateCoordinateWithEmptyLatOrLng() {
+        // given
+        final String username = "아이디";
+        final String password = "비밀번호";
+        UserCreateRequestDto request = createUserRequest(username, password, new Coordinate(37.1, 127.1));
+        User savedUser = userRepository.save(request.toEntity(password));
+
+        return List.of(
+                DynamicTest.dynamicTest("위도(Lat)값이 존재하지 않으면 예외가 발생한다.", () -> {
+                    // given
+                    final Coordinate coordinate = Coordinate.builder()
+                            .lng(127.1234)
+                            .build();
+                    final UserUpdateCoordinateRequest updateRequest = UserUpdateCoordinateRequest.builder()
+                            .coordinate(coordinate)
+                            .build();
+
+                    // when // then
+                    assertThatThrownBy(() -> {
+                        userService.updateCoordinate(savedUser.getId(), updateRequest);
+                    }).isInstanceOf(MarketAppException.class);
+                }),
+
+                DynamicTest.dynamicTest("경도(Lng)값이 존재하지 않으면 예외가 발생한다.", () -> {
+                    // given
+                    final Coordinate coordinate = Coordinate.builder()
+                            .lat(37.1)
+                            .build();
+                    final UserUpdateCoordinateRequest updateRequest = UserUpdateCoordinateRequest.builder()
+                            .coordinate(coordinate)
+                            .build();
+
+                    // when // then
+                    assertThatThrownBy(() -> {
+                        userService.updateCoordinate(savedUser.getId(), updateRequest);
                     }).isInstanceOf(MarketAppException.class);
                 })
         );
