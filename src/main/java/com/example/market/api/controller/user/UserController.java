@@ -3,6 +3,7 @@ package com.example.market.api.controller.user;
 import com.example.market.api.ApiResponse;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
+import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.service.user.UserService;
@@ -30,5 +31,12 @@ public class UserController {
                                                       @Valid@RequestBody final UserUpdateCoordinateRequest request) {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(userService.updateCoordinate(userId, request));
+    }
+
+    @PutMapping("/search-scope")
+    public ApiResponse<UserResponse> updateSearchScope(final Authentication authentication,
+                                                       @Valid @RequestBody final UserUpdateSearchScopeRequest request) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ApiResponse.ok(userService.updateSearchScope(userId, request));
     }
 }
