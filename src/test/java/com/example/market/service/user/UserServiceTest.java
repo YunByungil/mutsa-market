@@ -2,10 +2,12 @@ package com.example.market.service.user;
 
 import com.example.market.IntegrationTestSupport;
 import com.example.market.domain.entity.user.Coordinate;
+import com.example.market.domain.entity.user.SearchScope;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserLoginRequest;
 import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
+import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.user.UserRepository;
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType;
 import java.util.Collection;
 import java.util.List;
 
+import static com.example.market.domain.entity.user.SearchScope.WIDE;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -178,6 +181,27 @@ class UserServiceTest extends IntegrationTestSupport {
                     }).isInstanceOf(MarketAppException.class);
                 })
         );
+    }
+
+    @DisplayName("회원이 설정한 상품 검색 범위를 수정한다.")
+    @Test
+    void updateSearchScope() {
+        // given
+        final String username = "아이디";
+        final String password = "비밀번호";
+        final Coordinate coordinate = new Coordinate(37.1, 127.1);
+        UserCreateRequestDto createDto = createUserRequest(username, password, coordinate);
+        User savedUser = userRepository.save(createDto.toEntity(password));
+
+        UserUpdateSearchScopeRequest request = UserUpdateSearchScopeRequest.builder()
+                .searchScope(WIDE)
+                .build();
+
+        // when
+        UserResponse userResponse = userService.updateSearchScope(savedUser.getId(), request);
+
+        // then
+        assertThat(userResponse).isNotNull();
     }
 
     private UserCreateRequestDto createUserRequest(final String username, final String password, final Coordinate coordinate) {
