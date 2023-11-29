@@ -4,8 +4,10 @@ import com.example.market.api.controller.user.UserController;
 import com.example.market.docs.RestDocsSupport;
 import com.example.market.domain.entity.user.Address;
 import com.example.market.domain.entity.user.Coordinate;
+import com.example.market.domain.entity.user.SearchScope;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
+import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.service.user.UserService;
@@ -16,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.core.Authentication;
 
+import static com.example.market.domain.entity.user.SearchScope.WIDE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -153,6 +156,57 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                         .description("위도값"),
                                 fieldWithPath("coordinate.lng").type(NUMBER)
                                         .description("경도값")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.id").type(NUMBER)
+                                        .description("회원 ID"),
+                                fieldWithPath("data.username").type(STRING)
+                                        .description("아이디"),
+                                fieldWithPath("data.password").type(STRING)
+                                        .description("비밀번호")
+                        )
+                ));
+    }
+
+    @DisplayName("상품 검색 범위 수정 API")
+    @Test
+    void updateSearchScope() throws Exception {
+        // given
+        Authentication authentication = getAuthentication();
+
+        UserUpdateSearchScopeRequest request = UserUpdateSearchScopeRequest.builder()
+                .searchScope(WIDE)
+                .build();
+
+        given(userService.updateSearchScope(anyLong(), any(UserUpdateSearchScopeRequest.class)))
+                .willReturn(UserResponse.builder()
+                        .id(1L)
+                        .username("아이디")
+                        .password("비밀번호")
+                        .build());
+
+        mockMvc.perform(
+                        put("/search-scope")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("user-update-searchScope",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("searchScope").type(STRING)
+                                        .description("검색 범위")
                         ),
                         responseFields(
                                 fieldWithPath("code").type(NUMBER)
