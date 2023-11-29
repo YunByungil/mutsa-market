@@ -28,3 +28,13 @@ include::{snippets}/user-update-coordinate/request-fields.adoc[]
 ==== HTTP Response
 include::{snippets}/user-update-coordinate/http-response.adoc[]
 include::{snippets}/user-update-coordinate/response-fields.adoc[]
+
+=== 상품 검색 범위 수정
+
+==== HTTP Request
+include::{snippets}/user-update-searchScope/http-request.adoc[]
+include::{snippets}/user-update-searchScope/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/user-update-searchScope/http-response.adoc[]
+include::{snippets}/user-update-searchScope/response-fields.adoc[]

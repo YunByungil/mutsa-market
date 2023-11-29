@@ -66,4 +66,8 @@ public class User {
     public void updateCoordinate(final Point point) {
         this.location = point;
     }
+
+    public void updateSearchScope(final SearchScope searchScope) {
+        this.searchScope = searchScope;
+    }
 }

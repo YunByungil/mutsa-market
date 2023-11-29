@@ -4,9 +4,11 @@ import com.example.market.ControllerTestSupport;
 import com.example.market.domain.entity.Comment;
 import com.example.market.domain.entity.user.Address;
 import com.example.market.domain.entity.user.Coordinate;
+import com.example.market.domain.entity.user.SearchScope;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
+import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
 import com.example.market.repository.CommentRepository;
 import com.example.market.repository.ItemRepository;
 import com.example.market.repository.user.UserRepository;
@@ -192,6 +194,49 @@ class UserControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("좌표는 필수로 입력해야 합니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원이 설정한 상품 검색 범위를 수정한다.")
+    @Test
+    void updateSearchScope() throws Exception {
+        // given
+        UserUpdateSearchScopeRequest request = UserUpdateSearchScopeRequest.builder()
+                .searchScope(SearchScope.WIDE)
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/search-scope").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원이 설정한 상품 검색 범위를 수정할 때, 검색 범위는 필수 값이다.")
+    @Test
+    void updateSearchScopeWithEmptySearchScope() throws Exception {
+        // given
+        UserUpdateSearchScopeRequest request = UserUpdateSearchScopeRequest.builder()
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/search-scope").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("검색 범위는 필수로 입력해야 합니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 }

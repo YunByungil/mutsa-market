@@ -1,9 +1,11 @@
 package com.example.market.service.user;
 
 import com.example.market.domain.entity.user.Coordinate;
+import com.example.market.domain.entity.user.SearchScope;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.user.request.UserCreateRequestDto;
 import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
+import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
 import com.example.market.dto.user.response.UserCreateResponseDto;
 import com.example.market.dto.user.response.UserResponse;
 import com.example.market.exception.ErrorCode;
@@ -45,6 +47,15 @@ public class UserService {
         validateLatAndLng(request.getCoordinate());
 
         user.updateCoordinate(createPoint(request.getCoordinate()));
+
+        return UserResponse.of(user);
+    }
+
+    public UserResponse updateSearchScope(final Long userId, final UserUpdateSearchScopeRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        user.updateSearchScope(request.getSearchScope());
 
         return UserResponse.of(user);
     }
