@@ -5,7 +5,6 @@ import com.example.market.domain.entity.user.Address;
 import com.example.market.domain.entity.user.Coordinate;
 import com.example.market.domain.entity.user.User;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -62,6 +61,6 @@ public class UserCreateRequestDto {
 
     private static Point createPoint(final Coordinate coordinate) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLat(), coordinate.getLng()));
+        return geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(coordinate.getLng(), coordinate.getLat()));
     }
 }
