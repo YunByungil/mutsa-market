@@ -22,6 +22,19 @@ include::{snippets}/item-read-list/query-parameters.adoc[]
 include::{snippets}/item-read-list/http-response.adoc[]
 include::{snippets}/item-read-list/response-fields.adoc[]
 
+[[item-read-listTest]]
+=== 내 주변 상품 페이징 조회
+
+==== HTTP Request
+include::{snippets}/item-read-listTest/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/item-read-listTest/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-read-listTest/http-response.adoc[]
+include::{snippets}/item-read-listTest/response-fields.adoc[]
+
 [[item-read-one]]
 === 상품 단건 조회
 

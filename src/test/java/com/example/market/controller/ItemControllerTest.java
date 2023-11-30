@@ -38,6 +38,7 @@ import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -319,4 +320,23 @@ class ItemControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.message").value("OK"));
     }
 
+    @DisplayName("내 주변 판매 상품을 전체 조회한다.")
+    @Test
+    void readItemListTest() throws Exception {
+        // given
+        Page<ItemResponse> result = new PageImpl<>(emptyList());
+
+        when(itemService.readItemListTest(anyLong(), anyInt(), anyInt())).thenReturn(result);
+
+        // when // then
+        mockMvc.perform(
+                        get("/itemsTest")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isMap());
+    }
 }
