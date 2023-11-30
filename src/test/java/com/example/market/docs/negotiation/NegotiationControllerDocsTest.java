@@ -2,9 +2,9 @@ package com.example.market.docs.negotiation;
 
 import com.example.market.api.controller.negotiation.NegotiationController;
 import com.example.market.docs.RestDocsSupport;
-import com.example.market.dto.negotiation.request.NegotiationCreateRequestDto;
-import com.example.market.dto.negotiation.response.NegotiationResponse;
-import com.example.market.service.NegotiationService;
+import com.example.market.api.controller.negotiation.request.NegotiationCreateRequestDto;
+import com.example.market.api.controller.negotiation.response.NegotiationResponse;
+import com.example.market.service.negotiation.NegotiationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-import static com.example.market.domain.entity.enums.NegotiationStatus.SUGGEST;
+import static com.example.market.domain.negotiation.NegotiationStatus.SUGGEST;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;

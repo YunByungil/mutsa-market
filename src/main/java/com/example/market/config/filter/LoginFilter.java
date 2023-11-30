@@ -1,9 +1,8 @@
 package com.example.market.config.filter;
 
 import com.example.market.api.ApiResponse;
-import com.example.market.domain.entity.user.PrincipalUserDetails;
-import com.example.market.domain.entity.user.User;
-import com.example.market.dto.user.request.UserLoginRequest;
+import com.example.market.domain.user.PrincipalUserDetails;
+import com.example.market.api.controller.user.request.UserLoginRequest;
 import com.example.market.jwt.TokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

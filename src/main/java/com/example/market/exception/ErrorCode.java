@@ -1,6 +1,6 @@
 package com.example.market.exception;
 
-import com.example.market.domain.entity.enums.ResultCode;
+import com.example.market.api.ResultCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

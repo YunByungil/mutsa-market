@@ -1,16 +1,13 @@
 package com.example.market.service.user;
 
-import com.example.market.domain.entity.user.Coordinate;
-import com.example.market.domain.entity.user.SearchScope;
-import com.example.market.domain.entity.user.User;
-import com.example.market.dto.user.request.UserCreateRequestDto;
-import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
-import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
-import com.example.market.dto.user.response.UserCreateResponseDto;
-import com.example.market.dto.user.response.UserResponse;
-import com.example.market.exception.ErrorCode;
+import com.example.market.domain.user.Coordinate;
+import com.example.market.domain.user.User;
+import com.example.market.api.controller.user.request.UserCreateRequestDto;
+import com.example.market.api.controller.user.request.UserUpdateCoordinateRequest;
+import com.example.market.api.controller.user.request.UserUpdateSearchScopeRequest;
+import com.example.market.api.controller.user.response.UserResponse;
 import com.example.market.exception.MarketAppException;
-import com.example.market.repository.user.UserRepository;
+import com.example.market.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;

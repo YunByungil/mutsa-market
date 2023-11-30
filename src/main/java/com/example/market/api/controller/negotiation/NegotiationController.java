@@ -1,20 +1,15 @@
 package com.example.market.api.controller.negotiation;
 
 import com.example.market.api.ApiResponse;
-import com.example.market.dto.negotiation.request.NegotiationCreateRequestDto;
-import com.example.market.dto.negotiation.request.NegotiationUpdateRequestDto;
-import com.example.market.dto.negotiation.response.NegotiationListResponseDto;
-import com.example.market.dto.negotiation.response.NegotiationResponse;
-import com.example.market.dto.negotiation.response.NegotiationResponseDto;
-import com.example.market.service.NegotiationService;
+import com.example.market.api.controller.negotiation.request.NegotiationCreateRequestDto;
+import com.example.market.api.controller.negotiation.response.NegotiationResponse;
+import com.example.market.service.negotiation.NegotiationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import static com.example.market.common.SystemMessage.*;
 
 @Slf4j
 @RequiredArgsConstructor

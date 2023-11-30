@@ -1,21 +1,17 @@
 package com.example.market.api.controller.comment;
 
 import com.example.market.api.ApiResponse;
-import com.example.market.dto.comment.request.CommentCreateRequestDto;
-import com.example.market.dto.comment.request.CommentReplyRequestDto;
-import com.example.market.dto.comment.request.CommentUpdateRequestDto;
-import com.example.market.dto.comment.response.CommentListResponseDto;
-import com.example.market.dto.comment.response.CommentResponse;
-import com.example.market.dto.comment.response.CommentResponseDto;
-import com.example.market.service.CommentService;
+import com.example.market.api.controller.comment.request.CommentCreateRequestDto;
+import com.example.market.api.controller.comment.request.CommentReplyRequestDto;
+import com.example.market.api.controller.comment.request.CommentUpdateRequestDto;
+import com.example.market.api.controller.comment.response.CommentResponse;
+import com.example.market.service.comment.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import static com.example.market.common.SystemMessage.*;
 
 @Slf4j
 @RequiredArgsConstructor

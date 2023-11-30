@@ -1,36 +1,25 @@
 package com.example.market.service.user;
 
 import com.example.market.IntegrationTestSupport;
-import com.example.market.domain.entity.user.Coordinate;
-import com.example.market.domain.entity.user.SearchScope;
-import com.example.market.domain.entity.user.User;
-import com.example.market.dto.user.request.UserCreateRequestDto;
-import com.example.market.dto.user.request.UserLoginRequest;
-import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
-import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
-import com.example.market.dto.user.response.UserResponse;
+import com.example.market.domain.user.Coordinate;
+import com.example.market.domain.user.User;
+import com.example.market.api.controller.user.request.UserCreateRequestDto;
+import com.example.market.api.controller.user.request.UserUpdateCoordinateRequest;
+import com.example.market.api.controller.user.request.UserUpdateSearchScopeRequest;
+import com.example.market.api.controller.user.response.UserResponse;
 import com.example.market.exception.MarketAppException;
-import com.example.market.repository.user.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.market.domain.user.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 
 import java.util.Collection;
 import java.util.List;
 
-import static com.example.market.domain.entity.user.SearchScope.WIDE;
+import static com.example.market.domain.user.SearchScope.WIDE;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.JsonFieldType.*;
-import static org.springframework.restdocs.payload.JsonFieldType.STRING;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UserServiceTest extends IntegrationTestSupport {
 

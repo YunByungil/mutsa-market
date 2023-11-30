@@ -1,6 +1,6 @@
 package com.example.market.jwt;
 
-import com.example.market.domain.entity.user.User;
+import com.example.market.domain.user.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

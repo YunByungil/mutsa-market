@@ -1,15 +1,11 @@
 package com.example.market.viewController;
 
-import com.example.market.dto.comment.response.CommentListResponseDto;
-import com.example.market.dto.comment.response.CommentResponse;
-import com.example.market.dto.item.response.ItemListResponseDto;
-import com.example.market.dto.item.response.ItemOneResponseDto;
-import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.service.CommentService;
-import com.example.market.service.ItemService;
+import com.example.market.api.controller.comment.response.CommentResponse;
+import com.example.market.api.controller.item.response.ItemResponse;
+import com.example.market.service.comment.CommentService;
+import com.example.market.service.item.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

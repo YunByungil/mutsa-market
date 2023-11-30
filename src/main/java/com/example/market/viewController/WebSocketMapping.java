@@ -1,24 +1,17 @@
 package com.example.market.viewController;
 
-import com.example.market.domain.entity.chat.ChatRoom;
-import com.example.market.dto.chat.ChatMessage;
-import com.example.market.dto.chat.request.ChatMessageCreateDto;
-import com.example.market.repository.chat.ChatRepository;
-import com.example.market.repository.chat.ChatRoomRepository;
+import com.example.market.domain.chat.ChatRoom;
+import com.example.market.api.controller.chat.request.ChatMessageCreateDto;
+import com.example.market.domain.chat.ChatRepository;
+import com.example.market.domain.chat.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 @Slf4j
