@@ -1,9 +1,9 @@
 package com.example.market.viewController;
 
-import com.example.market.domain.entity.chat.Chat;
-import com.example.market.domain.entity.chat.ChatRoom;
-import com.example.market.repository.chat.ChatRepository;
-import com.example.market.repository.chat.ChatRoomRepository;
+import com.example.market.domain.chat.Chat;
+import com.example.market.domain.chat.ChatRoom;
+import com.example.market.domain.chat.ChatRepository;
+import com.example.market.domain.chat.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

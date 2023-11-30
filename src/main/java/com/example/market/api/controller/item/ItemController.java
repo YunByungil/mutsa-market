@@ -1,10 +1,10 @@
 package com.example.market.api.controller.item;
 
 import com.example.market.api.ApiResponse;
-import com.example.market.dto.item.request.ItemCreateRequestDto;
-import com.example.market.dto.item.request.ItemUpdateRequestDto;
-import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.service.ItemService;
+import com.example.market.api.controller.item.request.ItemCreateRequestDto;
+import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
+import com.example.market.api.controller.item.response.ItemResponse;
+import com.example.market.service.item.ItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-
-import static com.example.market.common.SystemMessage.*;
 
 @RequiredArgsConstructor
 @RestController

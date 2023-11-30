@@ -1,11 +1,10 @@
 package com.example.market.api.controller.user;
 
 import com.example.market.api.ApiResponse;
-import com.example.market.dto.user.request.UserCreateRequestDto;
-import com.example.market.dto.user.request.UserUpdateCoordinateRequest;
-import com.example.market.dto.user.request.UserUpdateSearchScopeRequest;
-import com.example.market.dto.user.response.UserCreateResponseDto;
-import com.example.market.dto.user.response.UserResponse;
+import com.example.market.api.controller.user.request.UserCreateRequestDto;
+import com.example.market.api.controller.user.request.UserUpdateCoordinateRequest;
+import com.example.market.api.controller.user.request.UserUpdateSearchScopeRequest;
+import com.example.market.api.controller.user.response.UserResponse;
 import com.example.market.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -2,10 +2,10 @@ package com.example.market.docs.item;
 
 import com.example.market.api.controller.item.ItemController;
 import com.example.market.docs.RestDocsSupport;
-import com.example.market.dto.item.request.ItemCreateRequestDto;
-import com.example.market.dto.item.request.ItemUpdateRequestDto;
-import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.service.ItemService;
+import com.example.market.api.controller.item.request.ItemCreateRequestDto;
+import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
+import com.example.market.api.controller.item.response.ItemResponse;
+import com.example.market.service.item.ItemService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,7 +16,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-import static com.example.market.domain.entity.enums.ItemStatus.SALE;
+import static com.example.market.domain.item.ItemStatus.SALE;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

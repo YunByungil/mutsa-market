@@ -1,14 +1,8 @@
 package com.example.market.docs.user.security;
 
-import com.example.market.config.filter.LoginFilter;
-import com.example.market.domain.entity.user.User;
-import com.example.market.dto.user.request.UserLoginRequest;
-import com.example.market.repository.user.UserRepository;
-import com.example.market.service.CommentService;
-import com.example.market.service.ItemService;
-import com.example.market.service.NegotiationService;
-import com.example.market.service.user.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.market.domain.user.User;
+import com.example.market.api.controller.user.request.UserLoginRequest;
+import com.example.market.domain.user.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,15 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;

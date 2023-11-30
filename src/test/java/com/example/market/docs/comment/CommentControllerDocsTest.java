@@ -2,12 +2,11 @@ package com.example.market.docs.comment;
 
 import com.example.market.api.controller.comment.CommentController;
 import com.example.market.docs.RestDocsSupport;
-import com.example.market.dto.comment.request.CommentCreateRequestDto;
-import com.example.market.dto.comment.request.CommentReplyRequestDto;
-import com.example.market.dto.comment.request.CommentUpdateRequestDto;
-import com.example.market.dto.comment.response.CommentResponse;
-import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.service.CommentService;
+import com.example.market.api.controller.comment.request.CommentCreateRequestDto;
+import com.example.market.api.controller.comment.request.CommentReplyRequestDto;
+import com.example.market.api.controller.comment.request.CommentUpdateRequestDto;
+import com.example.market.api.controller.comment.response.CommentResponse;
+import com.example.market.service.comment.CommentService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
