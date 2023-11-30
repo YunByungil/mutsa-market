@@ -3,15 +3,11 @@ package com.example.market.api.controller.item;
 import com.example.market.api.ApiResponse;
 import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
-import com.example.market.dto.item.response.ItemListResponseDto;
-import com.example.market.dto.item.response.ItemOneResponseDto;
 import com.example.market.dto.item.response.ItemResponse;
-import com.example.market.dto.item.response.ItemResponseDto;
 import com.example.market.service.ItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,9 +32,18 @@ public class ItemController {
 
     @GetMapping("/items")
     public ApiResponse<Page<ItemResponse>> readItemList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                  @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
+                                                        @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
 
         return ApiResponse.ok(itemService.readItemList(page, limit));
+    }
+
+    @GetMapping("/itemsTest")
+    public ApiResponse<Page<ItemResponse>> readItemListTest(final Authentication authentication,
+                                                            @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                            @RequestParam(value = "limit", defaultValue = "20") Integer limit) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ApiResponse.ok(itemService.readItemListTest(userId, page, limit));
     }
 
     @GetMapping("/items/{itemId}")
@@ -49,8 +54,8 @@ public class ItemController {
 
     @PutMapping("/items/{itemId}")
     public ApiResponse<ItemResponse> updateItem(@PathVariable Long itemId,
-                                      @Valid @RequestBody ItemUpdateRequestDto dto,
-                                      Authentication authentication) {
+                                                @Valid @RequestBody ItemUpdateRequestDto dto,
+                                                Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         return ApiResponse.ok(itemService.updateItem(itemId, dto, userId));
@@ -58,17 +63,17 @@ public class ItemController {
 
     @DeleteMapping("/items/{itemId}")
     public ApiResponse<ItemResponse> deleteItem(@PathVariable Long itemId,
-                                      Authentication authentication) {
+                                                Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         return ApiResponse.ok(itemService.deleteItem(itemId, userId));
     }
 
-//    @PutMapping("/items/{itemId}/image")
+    //    @PutMapping("/items/{itemId}/image")
     @RequestMapping(value = "/items/{itemId}/image", method = {RequestMethod.POST, RequestMethod.PUT})
     public ApiResponse<ItemResponse> updateItemImage(@PathVariable Long itemId,
-                                           @RequestParam MultipartFile image,
-                                           Authentication authentication) throws IOException {
+                                                     @RequestParam MultipartFile image,
+                                                     Authentication authentication) throws IOException {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(itemService.updateItemImage(itemId, image, userId));
     }

@@ -4,8 +4,6 @@ import com.example.market.domain.entity.Item;
 import com.example.market.domain.entity.user.User;
 import com.example.market.dto.item.request.ItemCreateRequestDto;
 import com.example.market.dto.item.request.ItemUpdateRequestDto;
-import com.example.market.dto.item.response.ItemListResponseDto;
-import com.example.market.dto.item.response.ItemOneResponseDto;
 import com.example.market.dto.item.response.ItemResponse;
 import com.example.market.exception.MarketAppException;
 import com.example.market.repository.ItemRepository;
@@ -16,11 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,6 +46,19 @@ public class ItemService {
     public Page<ItemResponse> readItemList(final int page, final int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
         Page<Item> itemList = itemRepository.findAll(pageable);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
+    }
+
+    public Page<ItemResponse> readItemListTest(final Long userId, final int page, final int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+        Page<Item> itemList = itemRepository.customFindAllByDistance(pageable, user.getLocation(), user.getSearchScope().getScope());
+//        Page<Item> itemList = itemRepository.customFindAllByDistance(pageable, user.getLocation());
 
         Page<ItemResponse> result = itemList.map(ItemResponse::of);
 
