@@ -31,14 +31,14 @@ public class User {
     private String phoneNumber;
     private String email;
     private String nickname;
-    @Embedded
-    private Address address;
     private String userImage;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Column(columnDefinition = "POINT SRID 4326")
     private Point location;
+
+    private String address;
 
     @Enumerated(EnumType.STRING)
     private SearchScope searchScope = SearchScope.NORMAL;
@@ -51,7 +51,7 @@ public class User {
 
     @Builder
     public User(String username, String password, String phoneNumber, String email, String nickname,
-                Address address, String userImage, Role role, final Point location) {
+                final String address, String userImage, Role role, final Point location) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;

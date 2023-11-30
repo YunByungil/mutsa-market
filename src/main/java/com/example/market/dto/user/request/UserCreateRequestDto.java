@@ -26,7 +26,10 @@ public class UserCreateRequestDto {
     private String phoneNumber;
     private String email;
     private String nickname;
-    private Address address;
+
+    @NotBlank(message = "주소는 필수로 입력해야 됩니다.")
+    private String address;
+
     private String userImage;
 
     @NotNull(message = "좌표는 필수로 입력해야 됩니다.")
@@ -34,7 +37,7 @@ public class UserCreateRequestDto {
 
     @Builder
     public UserCreateRequestDto(String username, String password, String phoneNumber, String email,
-                                String nickname, Address address, String userImage, final Coordinate coordinate) {
+                                String nickname, final String address, String userImage, final Coordinate coordinate) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;

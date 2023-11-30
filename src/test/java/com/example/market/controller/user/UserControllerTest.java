@@ -60,6 +60,7 @@ class UserControllerTest extends ControllerTestSupport {
                 .username("아이디")
                 .password("비밀번호")
                 .coordinate(new Coordinate(37.1, 127.1))
+                .address("주소")
                 .build();
 
         // when // then
@@ -83,6 +84,7 @@ class UserControllerTest extends ControllerTestSupport {
 //                .username("아이디")
                 .password("비밀번호")
                 .coordinate(new Coordinate(37.1, 127.1))
+                .address("주소")
                 .build();
 
         // when // then
@@ -108,6 +110,7 @@ class UserControllerTest extends ControllerTestSupport {
                 .username("아이디")
 //                .password("비밀번호")
                 .coordinate(new Coordinate(37.1, 127.1))
+                .address("주소")
                 .build();
 
         // when // then
@@ -133,6 +136,7 @@ class UserControllerTest extends ControllerTestSupport {
                 .username("아이디")
                 .password("비밀번호")
 //                .coordinate(new Coordinate(37.1, 127.1))
+                .address("주소")
                 .build();
 
         // when // then
@@ -146,6 +150,31 @@ class UserControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("좌표는 필수로 입력해야 됩니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("회원가입할 때 주소값을 꼭 입력해야 한다.")
+    @Test
+    void createUserWithEmptyAddress() throws Exception {
+        // given
+        UserCreateRequestDto request = UserCreateRequestDto.builder()
+                .username("아이디")
+                .password("비밀번호")
+                .coordinate(new Coordinate(37.1, 127.1))
+//                .address("주소")
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        post("/join").with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("주소는 필수로 입력해야 됩니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
