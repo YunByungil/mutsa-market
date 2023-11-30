@@ -32,7 +32,6 @@ class UserRepositoryTest {
     @Test
     void createUser() {
         // given
-        Address address = new Address("city", "street", "zipcode");
         UserCreateRequestDto createDto = UserCreateRequestDto.builder()
                 .username("아이디")
                 .password("비밀번호")
@@ -40,7 +39,7 @@ class UserRepositoryTest {
                 .nickname("닉네임")
                 .phoneNumber("번호")
                 .userImage("사진")
-                .address(address)
+                .address("주소")
                 .build();
 
         // when
@@ -48,7 +47,6 @@ class UserRepositoryTest {
 
         // then
         assertThat(savedUser.getNickname()).isEqualTo("닉네임");
-        assertThat(savedUser.getAddress().getCity()).isEqualTo(address.getCity());
         assertThat(savedUser.getRole()).isEqualTo(Role.USER);
     }
 
@@ -57,7 +55,6 @@ class UserRepositoryTest {
     @Test
     void findByUsername() {
         // given
-        Address address = new Address("city", "street", "zipcode");
         UserCreateRequestDto createDto = UserCreateRequestDto.builder()
                 .username("아이디")
                 .password("비밀번호")
@@ -65,7 +62,7 @@ class UserRepositoryTest {
                 .nickname("닉네임")
                 .phoneNumber("번호")
                 .userImage("사진")
-                .address(address)
+                .address("주소")
                 .build();
 
         userRepository.save(createDto.toEntity(createDto.getPassword()));
@@ -75,7 +72,6 @@ class UserRepositoryTest {
 
         // then
         assertThat(savedUser.getNickname()).isEqualTo("닉네임");
-        assertThat(savedUser.getAddress().getCity()).isEqualTo(address.getCity());
         assertThat(savedUser.getRole()).isEqualTo(Role.USER);
     }
 }

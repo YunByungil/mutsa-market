@@ -52,7 +52,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
                 .email("email@email.com")
                 .userImage("profile.jpg")
                 .phoneNumber("010-1234-5678")
-                .address(new Address("고양시", "일산서구", "12345"))
+                .address("주소")
                 .coordinate(new Coordinate(37.1, 127.1))
                 .build();
 
@@ -87,15 +87,8 @@ public class UserControllerDocsTest extends RestDocsSupport {
                                 fieldWithPath("nickname").type(STRING)
                                         .optional()
                                         .description("닉네임"),
-                                fieldWithPath("address.city").type(STRING)
-                                        .optional()
-                                        .description("시/군/구"),
-                                fieldWithPath("address.street").type(STRING)
-                                        .optional()
-                                        .description("동/읍/면/리"),
-                                fieldWithPath("address.zipcode").type(STRING)
-                                        .optional()
-                                        .description("우편번호"),
+                                fieldWithPath("address").type(STRING)
+                                        .description("주소"),
                                 fieldWithPath("userImage").type(STRING)
                                         .optional()
                                         .description("이미지"),
