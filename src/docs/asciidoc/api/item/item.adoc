@@ -56,6 +56,17 @@ include::{snippets}/item-update/request-fields.adoc[]
 include::{snippets}/item-update/http-response.adoc[]
 include::{snippets}/item-update/response-fields.adoc[]
 
+[[item-update-status]]
+=== 상품 상태 수정
+
+==== HTTP Request
+include::{snippets}/item-update-status/http-request.adoc[]
+include::{snippets}/item-update-status/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-update-status/http-response.adoc[]
+include::{snippets}/item-update-status/response-fields.adoc[]
+
 [[item-delete]]
 === 상품 삭제
 
