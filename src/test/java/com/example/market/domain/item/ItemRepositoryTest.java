@@ -32,18 +32,6 @@ class ItemRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-//    User user;
-//
-//    @BeforeEach
-//    void setUp() {
-//        itemRepository.deleteAll();
-//        user = userRepository.save(User.builder()
-//                .username("아이디")
-//                .password("비밀번호")
-//                .role(Role.USER)
-//                .build());
-//    }
-
     @DisplayName("판매 중인 상품들을 조회한다.")
     @Test
     void findAllByStatus() {
@@ -99,6 +87,39 @@ class ItemRepositoryTest {
                         tuple("제목1", "내용1", SALE),
                         tuple("제목2", "내용2", SALE),
                         tuple("제목3", "내용3", SOLD)
+                );
+    }
+
+    @DisplayName("내가 등록한 상품들 중, 판매 중, 예약 중인 상품들을 조회한다.")
+    @Test
+    void findAllByStatusInAndUserId() {
+        // given
+        final String username = "아이디";
+        final String password = "비밀번호";
+        User user = createUser(username, password, new Coordinate(37.1, 127.1));
+        User anotherUser = createUser(username, password, new Coordinate(37.1, 127.1));
+        userRepository.saveAll(List.of(user, anotherUser));
+
+        Item item1 = createItem("제목1", "내용1", SALE, 1000, user);
+        Item item2 = createItem("제목2", "내용2", SALE, 2000, user);
+        Item item3 = createItem("제목3", "내용3", SOLD, 3000, user);
+        Item item4 = createItem("제목4", "내용4", RESERVATION, 2000, user);
+
+        Item anotherItem1 = createItem("제목11", "내용2", SALE, 2000, anotherUser);
+        Item anotherItem2 = createItem("제목22", "내용1", SALE, 1000, anotherUser);
+
+        itemRepository.saveAll(List.of(item1, item2, item3, item4, anotherItem1, anotherItem2));
+
+        // when
+        Page<Item> items = itemRepository.findAllByStatusInAndUserId(forDisplay(), PageRequest.of(0, 5), user.getId());
+
+        // then
+        assertThat(items).hasSize(3)
+                .extracting("title", "description", "status")
+                .containsExactlyInAnyOrder(
+                        tuple("제목1", "내용1", SALE),
+                        tuple("제목2", "내용2", SALE),
+                        tuple("제목4", "내용4", RESERVATION)
                 );
     }
 

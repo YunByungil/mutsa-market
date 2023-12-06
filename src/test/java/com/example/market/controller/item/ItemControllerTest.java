@@ -353,4 +353,24 @@ class ItemControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("상품 판매상태는 필수입니다."));
     }
+
+    @DisplayName("내가 판매 중인 아이템 목록을 불러온다.")
+    @Test
+    void readMyItemListForSale() throws Exception {
+        // given
+        Page<ItemResponse> result = new PageImpl<>(emptyList());
+
+        when(itemService.readMyItemListForSale(anyLong(), anyInt())).thenReturn(result);
+
+        // when // then
+        mockMvc.perform(
+                        get("/items-sale")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isMap());
+    }
 }

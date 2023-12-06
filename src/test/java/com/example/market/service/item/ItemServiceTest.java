@@ -361,6 +361,34 @@ class ItemServiceTest extends IntegrationTestSupport {
                 .hasMessage("작성자 정보가 일치하지 않습니다.");
     }
 
+    @DisplayName("내가 등록한 상품들 중, 판매 중, 예약 중인 상품들을 조회한다.")
+    @Test
+    void readMyItemListForSale() {
+        // given
+        User user = createUser();
+        userRepository.save(user);
+
+        Item item1 = createItem(user, 10_000, "제목1", "내용1", SALE);
+        Item item2 = createItem(user, 20_000, "제목2", "내용2", SALE);
+        Item item3 = createItem(user, 30_000, "제목3", "내용3", SALE);
+        Item item4 = createItem(user, 40_000, "제목4", "내용4", SOLD);
+        Item item5 = createItem(user, 50_000, "제목5", "내용5", RESERVATION);
+        itemRepository.saveAll(List.of(item1, item2, item3, item4, item5));
+
+        // when
+        Page<ItemResponse> itemResponses = itemService.readMyItemListForSale(user.getId(), 0);
+
+        // then
+        assertThat(itemResponses).hasSize(4)
+                .extracting("title", "description", "minPriceWanted")
+                .containsExactlyInAnyOrder(
+                        tuple(item1.getTitle(), item1.getDescription(), item1.getMinPriceWanted()),
+                        tuple(item2.getTitle(), item2.getDescription(), item2.getMinPriceWanted()),
+                        tuple(item3.getTitle(), item3.getDescription(), item3.getMinPriceWanted()),
+                        tuple(item5.getTitle(), item5.getDescription(), item5.getMinPriceWanted())
+                );
+
+    }
     private User createUser() {
         return User.builder()
                 .username("아이디")
