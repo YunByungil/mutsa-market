@@ -22,6 +22,19 @@ include::{snippets}/item-read-list/query-parameters.adoc[]
 include::{snippets}/item-read-list/http-response.adoc[]
 include::{snippets}/item-read-list/response-fields.adoc[]
 
+[[item-read-my-list-for-sale]]
+=== 내가 등록한 판매 중, 예약 중인 상품 조회
+
+==== HTTP Request
+include::{snippets}/item-read-my-list-for-sale/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/item-read-my-list-for-sale/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/item-read-my-list-for-sale/http-response.adoc[]
+include::{snippets}/item-read-my-list-for-sale/response-fields.adoc[]
+
 [[item-read-listTest]]
 === 내 주변 상품 페이징 조회
 
