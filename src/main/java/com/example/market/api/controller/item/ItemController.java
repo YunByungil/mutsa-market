@@ -85,4 +85,12 @@ public class ItemController {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(itemService.updateItemStatus(itemId, request, userId));
     }
+
+    @GetMapping("/items-sale")
+    public ApiResponse<Page<ItemResponse>> readMyItemListForSale(final Authentication authentication,
+                                                                 @RequestParam(value = "page", defaultValue = "0") int page) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ApiResponse.ok(itemService.readMyItemListForSale(userId, page));
+    }
 }

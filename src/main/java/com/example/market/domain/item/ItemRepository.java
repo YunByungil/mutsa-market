@@ -19,4 +19,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Page<Item> customFindAllByDistance(Pageable pageable,
                                        @Param("point") Point point,
                                        @Param("scope") Double scope);
+
+
+    Page<Item> findAllByStatusInAndUserId(List<ItemStatus> statuses, Pageable pageable,
+                                          @Param("userId") Long userId);
 }
