@@ -2,6 +2,7 @@ package com.example.market.service.item;
 
 import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.domain.item.Item;
+import com.example.market.domain.item.ItemStatus;
 import com.example.market.domain.user.User;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;
 import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
@@ -23,6 +24,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.example.market.domain.item.ItemStatus.forDisplay;
+import static com.example.market.domain.item.ItemStatus.forSold;
 import static com.example.market.exception.ErrorCode.*;
 
 @Slf4j
@@ -166,5 +169,63 @@ public class ItemService {
         item.updateStatus(request.getStatus());
 
         return ItemResponse.of(item);
+    }
+
+    public Page<ItemResponse> readMyItemListForSale(final Long userId, final int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        Page<Item> itemList = itemRepository.findAllByStatusInAndUserId(forDisplay(), pageable, userId);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
+    }
+
+    public Page<ItemResponse> readMyItemListForSold(final Long userId, final int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        Page<Item> itemList = itemRepository.findAllByStatusAndUserId(forSold(), pageable, userId);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
+    }
+
+    public Page<ItemResponse> readUserItemListForSale(final Long myId, final Long userId, final int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        User my = userRepository.findById(myId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        Page<Item> itemList = itemRepository.findAllByStatusInAndUserId(forDisplay(), pageable, userId);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
+    }
+
+    public Page<ItemResponse> readUserItemListForSold(final Long myId, final Long userId, final int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        User my = userRepository.findById(myId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        Page<Item> itemList = itemRepository.findAllByStatusAndUserId(forSold(), pageable, userId);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
     }
 }

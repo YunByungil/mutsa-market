@@ -18,8 +18,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-import static com.example.market.domain.item.ItemStatus.SALE;
-import static com.example.market.domain.item.ItemStatus.SOLD;
+import static com.example.market.domain.item.ItemStatus.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -114,9 +113,9 @@ public class ItemControllerDocsTest extends RestDocsSupport {
     @Test
     void readItemList() throws Exception {
         List<ItemResponse> list = List.of(
-                createItemResponse(1L, "상품제목1", 10_000, "판매자"),
-                createItemResponse(2L, "상품제목2", 20_000, "판매자2"),
-                createItemResponse(3L, "상품제목3", 30_000, "판매자3")
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SALE),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자2", SALE),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자3", SALE)
         );
 
         Page<ItemResponse> result = new PageImpl<>(list);
@@ -194,7 +193,7 @@ public class ItemControllerDocsTest extends RestDocsSupport {
     @Test
     void readItemOne() throws Exception {
         given(itemService.readItemOne(anyLong()))
-                .willReturn(createItemResponse(1L, "상품제목", 10_000, "판매자"));
+                .willReturn(createItemResponse(1L, "상품제목", 10_000, "판매자", SALE));
 
         mockMvc.perform(
                         get("/items/{itemId}", 1L)
@@ -339,9 +338,9 @@ public class ItemControllerDocsTest extends RestDocsSupport {
         Authentication authentication = getAuthentication();
 
         List<ItemResponse> list = List.of(
-                createItemResponse(1L, "상품제목1", 10_000, "판매자"),
-                createItemResponse(2L, "상품제목2", 20_000, "판매자2"),
-                createItemResponse(3L, "상품제목3", 30_000, "판매자3")
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SALE),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자2", SALE),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자3", SALE)
         );
 
         Page<ItemResponse> result = new PageImpl<>(list);
@@ -416,7 +415,6 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
-    // TODO
     @DisplayName("상품 상태 수정 API")
     @Test
     void updateItemStatus() throws Exception {
@@ -470,18 +468,351 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
+    @DisplayName("내가 등록한 판매 중, 예약 중인 상품들 조회 API")
+    @Test
+    void readMyItemListForSale() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        List<ItemResponse> list = List.of(
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SALE),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자", SALE),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자", SALE),
+                createItemResponse(4L, "상품제목4", 40_000, "판매자", RESERVATION)
+        );
+
+        Page<ItemResponse> result = new PageImpl<>(list);
+        given(itemService.readMyItemListForSale(anyLong(), anyInt()))
+                .willReturn(result);
+
+        mockMvc.perform(
+                        get("/items-sale")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("page", "0")
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("item-read-my-list-for-sale",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("page")
+                                        .description("페이지")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.content[].id").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.content[].title").type(STRING)
+                                        .description("상품제목"),
+                                fieldWithPath("data.content[].description").type(STRING)
+                                        .description("상품설명"),
+                                fieldWithPath("data.content[].minPriceWanted").type(NUMBER)
+                                        .description("상품가격"),
+                                fieldWithPath("data.content[].status").type(STRING)
+                                        .description("판매상태"),
+                                fieldWithPath("data.content[].username").type(STRING)
+                                        .description("판매자"),
+
+                                fieldWithPath("data.last").
+                                        description("마지막 페이지인지 여부"),
+                                fieldWithPath("data.totalPages").
+                                        description("전체 페이지 개수"),
+                                fieldWithPath("data.totalElements").
+                                        description("테이블 총 데이터 개수"),
+                                fieldWithPath("data.first").
+                                        description("첫번째 페이지인지 여부"),
+                                fieldWithPath("data.numberOfElements").
+                                        description("요청 페이지에서 조회 된 데이터 개수"),
+                                fieldWithPath("data.number").
+                                        description("현재 페이지 번호"),
+                                fieldWithPath("data.size").
+                                        description("한 페이지당 조회할 데이터 개수"),
+
+                                fieldWithPath("data.sort.sorted").
+                                        description("정렬 됐는지 여부"),
+                                fieldWithPath("data.sort.unsorted").
+                                        description("정렬 안 됐는지 여부"),
+                                fieldWithPath("data.sort.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.pageable").
+                                        description("페이징 정보")
+                        )
+                ));
+    }
+
+    @DisplayName("내가 등록한 상품 중, 판매 완료인 상품들 조회 API")
+    @Test
+    void readMyItemListForSold() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        List<ItemResponse> list = List.of(
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SOLD),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자", SOLD),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자", SOLD)
+        );
+
+        Page<ItemResponse> result = new PageImpl<>(list);
+        given(itemService.readMyItemListForSold(anyLong(), anyInt()))
+                .willReturn(result);
+
+        mockMvc.perform(
+                        get("/items-sold")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("page", "0")
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("item-read-my-list-for-sold",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("page")
+                                        .description("페이지")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.content[].id").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.content[].title").type(STRING)
+                                        .description("상품제목"),
+                                fieldWithPath("data.content[].description").type(STRING)
+                                        .description("상품설명"),
+                                fieldWithPath("data.content[].minPriceWanted").type(NUMBER)
+                                        .description("상품가격"),
+                                fieldWithPath("data.content[].status").type(STRING)
+                                        .description("판매상태"),
+                                fieldWithPath("data.content[].username").type(STRING)
+                                        .description("판매자"),
+
+                                fieldWithPath("data.last").
+                                        description("마지막 페이지인지 여부"),
+                                fieldWithPath("data.totalPages").
+                                        description("전체 페이지 개수"),
+                                fieldWithPath("data.totalElements").
+                                        description("테이블 총 데이터 개수"),
+                                fieldWithPath("data.first").
+                                        description("첫번째 페이지인지 여부"),
+                                fieldWithPath("data.numberOfElements").
+                                        description("요청 페이지에서 조회 된 데이터 개수"),
+                                fieldWithPath("data.number").
+                                        description("현재 페이지 번호"),
+                                fieldWithPath("data.size").
+                                        description("한 페이지당 조회할 데이터 개수"),
+
+                                fieldWithPath("data.sort.sorted").
+                                        description("정렬 됐는지 여부"),
+                                fieldWithPath("data.sort.unsorted").
+                                        description("정렬 안 됐는지 여부"),
+                                fieldWithPath("data.sort.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.pageable").
+                                        description("페이징 정보")
+                        )
+                ));
+    }
+
+    @DisplayName("유저가 등록한 판매 중, 예약 중인 상품들 조회 API")
+    @Test
+    void readUserItemListForSale() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        List<ItemResponse> list = List.of(
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SALE),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자", SALE),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자", SALE),
+                createItemResponse(4L, "상품제목4", 40_000, "판매자", RESERVATION)
+        );
+
+        Page<ItemResponse> result = new PageImpl<>(list);
+        given(itemService.readUserItemListForSale(anyLong(), anyLong(), anyInt()))
+                .willReturn(result);
+
+        mockMvc.perform(
+                        get("/items-sale/{userId}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("page", "0")
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("item-read-user-list-for-sale",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("page")
+                                        .description("페이지")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.content[].id").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.content[].title").type(STRING)
+                                        .description("상품제목"),
+                                fieldWithPath("data.content[].description").type(STRING)
+                                        .description("상품설명"),
+                                fieldWithPath("data.content[].minPriceWanted").type(NUMBER)
+                                        .description("상품가격"),
+                                fieldWithPath("data.content[].status").type(STRING)
+                                        .description("판매상태"),
+                                fieldWithPath("data.content[].username").type(STRING)
+                                        .description("판매자"),
+
+                                fieldWithPath("data.last").
+                                        description("마지막 페이지인지 여부"),
+                                fieldWithPath("data.totalPages").
+                                        description("전체 페이지 개수"),
+                                fieldWithPath("data.totalElements").
+                                        description("테이블 총 데이터 개수"),
+                                fieldWithPath("data.first").
+                                        description("첫번째 페이지인지 여부"),
+                                fieldWithPath("data.numberOfElements").
+                                        description("요청 페이지에서 조회 된 데이터 개수"),
+                                fieldWithPath("data.number").
+                                        description("현재 페이지 번호"),
+                                fieldWithPath("data.size").
+                                        description("한 페이지당 조회할 데이터 개수"),
+
+                                fieldWithPath("data.sort.sorted").
+                                        description("정렬 됐는지 여부"),
+                                fieldWithPath("data.sort.unsorted").
+                                        description("정렬 안 됐는지 여부"),
+                                fieldWithPath("data.sort.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.pageable").
+                                        description("페이징 정보")
+                        )
+                ));
+    }
+
+    @DisplayName("유저가 등록한 상품 중, 판매 완료인 상품들 조회 API")
+    @Test
+    void readUserItemListForSold() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        List<ItemResponse> list = List.of(
+                createItemResponse(1L, "상품제목1", 10_000, "판매자", SOLD),
+                createItemResponse(2L, "상품제목2", 20_000, "판매자", SOLD),
+                createItemResponse(3L, "상품제목3", 30_000, "판매자", SOLD)
+        );
+
+        Page<ItemResponse> result = new PageImpl<>(list);
+        given(itemService.readUserItemListForSold(anyLong(), anyLong(), anyInt()))
+                .willReturn(result);
+
+        mockMvc.perform(
+                        get("/items-sold/{userId}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("page", "0")
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("item-read-user-list-for-sold",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("page")
+                                        .description("페이지")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.content[].id").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.content[].title").type(STRING)
+                                        .description("상품제목"),
+                                fieldWithPath("data.content[].description").type(STRING)
+                                        .description("상품설명"),
+                                fieldWithPath("data.content[].minPriceWanted").type(NUMBER)
+                                        .description("상품가격"),
+                                fieldWithPath("data.content[].status").type(STRING)
+                                        .description("판매상태"),
+                                fieldWithPath("data.content[].username").type(STRING)
+                                        .description("판매자"),
+
+                                fieldWithPath("data.last").
+                                        description("마지막 페이지인지 여부"),
+                                fieldWithPath("data.totalPages").
+                                        description("전체 페이지 개수"),
+                                fieldWithPath("data.totalElements").
+                                        description("테이블 총 데이터 개수"),
+                                fieldWithPath("data.first").
+                                        description("첫번째 페이지인지 여부"),
+                                fieldWithPath("data.numberOfElements").
+                                        description("요청 페이지에서 조회 된 데이터 개수"),
+                                fieldWithPath("data.number").
+                                        description("현재 페이지 번호"),
+                                fieldWithPath("data.size").
+                                        description("한 페이지당 조회할 데이터 개수"),
+
+                                fieldWithPath("data.sort.sorted").
+                                        description("정렬 됐는지 여부"),
+                                fieldWithPath("data.sort.unsorted").
+                                        description("정렬 안 됐는지 여부"),
+                                fieldWithPath("data.sort.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.empty").
+                                        description("데이터가 비었는지 여부"),
+
+                                fieldWithPath("data.pageable").
+                                        description("페이징 정보")
+                        )
+                ));
+    }
     private Authentication getAuthentication() {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getName()).thenReturn("1");
         return authentication;
     }
 
-    private ItemResponse createItemResponse(final Long id, final String title, final int minPriceWanted, final String username) {
+    private ItemResponse createItemResponse(final Long id, final String title, final int minPriceWanted, final String username, final ItemStatus status) {
         return ItemResponse.builder()
                 .id(id)
                 .title(title)
                 .description("상품내용")
-                .status(SALE)
+                .status(status)
                 .minPriceWanted(minPriceWanted)
                 .username(username)
                 .build();
