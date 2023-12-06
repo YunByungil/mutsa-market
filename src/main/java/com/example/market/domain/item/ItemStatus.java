@@ -15,4 +15,8 @@ public enum ItemStatus {
     public static List<ItemStatus> forDisplay() {
         return List.of(SALE, RESERVATION);
     }
+
+    public static ItemStatus forSold() {
+        return SOLD;
+    }
 }

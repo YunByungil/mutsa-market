@@ -23,4 +23,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findAllByStatusInAndUserId(List<ItemStatus> statuses, Pageable pageable,
                                           @Param("userId") Long userId);
+
+    Page<Item> findAllByStatusAndUserId(ItemStatus status, Pageable pageable,
+                                        @Param("userId") Long userId);
 }
