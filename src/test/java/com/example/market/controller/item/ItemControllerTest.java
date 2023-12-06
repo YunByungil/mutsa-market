@@ -2,8 +2,10 @@ package com.example.market.controller.item;
 
 import com.example.market.ControllerTestSupport;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;
+import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
 import com.example.market.api.controller.item.response.ItemResponse;
+import com.example.market.domain.item.ItemStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -309,5 +311,46 @@ class ItemControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.status").value("OK"))
                 .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isMap());
+    }
+
+    @DisplayName("상품 상태를 변경한다.")
+    @Test
+    void updateItemStatus() throws Exception {
+        // given
+        ItemStatusUpdateRequest request = ItemStatusUpdateRequest.builder()
+                .status(ItemStatus.SOLD)
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/items/status/{itemId}", 1).with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"));
+    }
+
+    @DisplayName("상품 상태를 변경할 때, 상태 값은 필수다.")
+    @Test
+    void updateItemStatusWithEmptyStatus() throws Exception {
+        // given
+        ItemStatusUpdateRequest request = ItemStatusUpdateRequest.builder()
+                .build();
+
+        // when // then
+        mockMvc.perform(
+                        put("/items/status/{itemId}", 1).with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("상품 판매상태는 필수입니다."));
     }
 }
