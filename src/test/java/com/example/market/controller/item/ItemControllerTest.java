@@ -354,6 +354,46 @@ class ItemControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.message").value("상품 판매상태는 필수입니다."));
     }
 
+    @DisplayName("내가 판매 중인 아이템 목록을 불러온다.")
+    @Test
+    void readMyItemListForSale() throws Exception {
+        // given
+        Page<ItemResponse> result = new PageImpl<>(emptyList());
+
+        when(itemService.readMyItemListForSale(anyLong(), anyInt())).thenReturn(result);
+
+        // when // then
+        mockMvc.perform(
+                        get("/items-sale")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isMap());
+    }
+
+    @DisplayName("내가 등록한 상품 중 판매 완료 아이템 목록을 불러온다.")
+    @Test
+    void readMyItemListForSold() throws Exception {
+        // given
+        Page<ItemResponse> result = new PageImpl<>(emptyList());
+
+        when(itemService.readMyItemListForSold(anyLong(), anyInt())).thenReturn(result);
+
+        // when // then
+        mockMvc.perform(
+                        get("/items-sold")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data").isMap());
+    }
+
     @DisplayName("유저가 판매 중인 아이템 목록을 불러온다.")
     @Test
     void readUserItemListForSale() throws Exception {
@@ -374,17 +414,17 @@ class ItemControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.data").isMap());
     }
 
-    @DisplayName("내가 판매 중인 아이템 목록을 불러온다.")
+    @DisplayName("유저가 등록한 상품 중 판매 완료 아이템 목록을 불러온다.")
     @Test
-    void readMyItemListForSale() throws Exception {
+    void readUserItemListForSold() throws Exception {
         // given
         Page<ItemResponse> result = new PageImpl<>(emptyList());
 
-        when(itemService.readMyItemListForSale(anyLong(), anyInt())).thenReturn(result);
+        when(itemService.readUserItemListForSold(anyLong(), anyLong(), anyInt())).thenReturn(result);
 
         // when // then
         mockMvc.perform(
-                        get("/items-sale")
+                        get("/items-sold/{userId}", 1L)
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
