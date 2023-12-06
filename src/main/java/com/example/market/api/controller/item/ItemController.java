@@ -93,4 +93,12 @@ public class ItemController {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(itemService.readMyItemListForSale(userId, page));
     }
+
+    @GetMapping("/items-sale/{userId}")
+    public ApiResponse<Page<ItemResponse>> readUserItemListForSale(final Authentication authentication,
+                                                                   @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                   @PathVariable final Long userId) {
+        Long myId = Long.parseLong(authentication.getName());
+        return ApiResponse.ok(itemService.readUserItemListForSale(userId, myId, page));
+    }
 }

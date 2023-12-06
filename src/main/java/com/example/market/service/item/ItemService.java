@@ -182,4 +182,20 @@ public class ItemService {
 
         return result;
     }
+
+    public Page<ItemResponse> readUserItemListForSale(final Long myId, final Long userId, final int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("id").descending());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        User my = userRepository.findById(myId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        Page<Item> itemList = itemRepository.findAllByStatusInAndUserId(forDisplay(), pageable, userId);
+
+        Page<ItemResponse> result = itemList.map(ItemResponse::of);
+
+        return result;
+    }
 }
