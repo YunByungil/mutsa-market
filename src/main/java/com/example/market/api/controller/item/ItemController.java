@@ -2,6 +2,7 @@ package com.example.market.api.controller.item;
 
 import com.example.market.api.ApiResponse;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;
+import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
 import com.example.market.api.controller.item.response.ItemResponse;
 import com.example.market.service.item.ItemService;
@@ -74,5 +75,14 @@ public class ItemController {
                                                      Authentication authentication) throws IOException {
         Long userId = Long.parseLong(authentication.getName());
         return ApiResponse.ok(itemService.updateItemImage(itemId, image, userId));
+    }
+
+    @PutMapping("/items/status/{itemId}")
+    public ApiResponse<ItemResponse> updateItemStatus(@PathVariable final Long itemId,
+                                                      @Valid @RequestBody final ItemStatusUpdateRequest request,
+                                                      final Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ApiResponse.ok(itemService.updateItemStatus(itemId, request, userId));
     }
 }

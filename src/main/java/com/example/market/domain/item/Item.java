@@ -59,7 +59,7 @@ public class Item {
         this.imageUrl = imageUrl;
     }
 
-    public void updateStatus(ItemStatus status) {
+    public void updateStatus(final ItemStatus status) {
         this.status = status;
     }
 }

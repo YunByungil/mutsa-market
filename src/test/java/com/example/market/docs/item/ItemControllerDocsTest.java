@@ -1,10 +1,12 @@
 package com.example.market.docs.item;
 
 import com.example.market.api.controller.item.ItemController;
+import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.docs.RestDocsSupport;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;
 import com.example.market.api.controller.item.request.ItemUpdateRequestDto;
 import com.example.market.api.controller.item.response.ItemResponse;
+import com.example.market.domain.item.ItemStatus;
 import com.example.market.service.item.ItemService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 import static com.example.market.domain.item.ItemStatus.SALE;
+import static com.example.market.domain.item.ItemStatus.SOLD;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -413,6 +416,60 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                 ));
     }
 
+    // TODO
+    @DisplayName("상품 상태 수정 API")
+    @Test
+    void updateItemStatus() throws Exception {
+        Authentication authentication = getAuthentication();
+
+        ItemStatusUpdateRequest request = ItemStatusUpdateRequest.builder()
+                .status(SOLD)
+                .build();
+
+        given(itemService.updateItemStatus(anyLong(), any(ItemStatusUpdateRequest.class), anyLong()))
+                .willReturn(updateItemStatusResponse(request.getStatus()));
+
+        mockMvc.perform(
+                        put("/items/status/{itemId}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .principal(authentication)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("item-update-status",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("status").type(STRING)
+                                        .description("상품 상태")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").type(NUMBER)
+                                        .description("코드"),
+                                fieldWithPath("status").type(STRING)
+                                        .description("상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("메세지"),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.id").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.title").type(STRING)
+                                        .description("상품제목"),
+                                fieldWithPath("data.description").type(STRING)
+                                        .description("상품설명"),
+                                fieldWithPath("data.minPriceWanted").type(NUMBER)
+                                        .description("상품가격"),
+                                fieldWithPath("data.status").type(STRING)
+                                        .description("판매상태"),
+                                fieldWithPath("data.username").type(STRING)
+                                        .description("판매자")
+
+                        )
+                ));
+    }
+
     private Authentication getAuthentication() {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getName()).thenReturn("1");
@@ -448,6 +505,17 @@ public class ItemControllerDocsTest extends RestDocsSupport {
                 .description(description)
                 .status(SALE)
                 .minPriceWanted(minPriceWanted)
+                .username("판매자")
+                .build();
+    }
+
+    private ItemResponse updateItemStatusResponse(final ItemStatus status) {
+        return ItemResponse.builder()
+                .id(1L)
+                .title("제목")
+                .description("설명")
+                .status(status)
+                .minPriceWanted(10_000)
                 .username("판매자")
                 .build();
     }

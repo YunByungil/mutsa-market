@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Page<Item> findAllByStatus(ItemStatus status, Pageable pageable);
+    Page<Item> findAllByStatusIn(List<ItemStatus> statuses, Pageable pageable);
 
     @Query(value = "select i.*, ST_Distance_Sphere(u.location, :point) as dis " +
             "from item i join users u on i.user_id = u.user_id " +

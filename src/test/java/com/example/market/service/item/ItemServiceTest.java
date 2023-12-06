@@ -1,6 +1,7 @@
 package com.example.market.service.item;
 
 import com.example.market.IntegrationTestSupport;
+import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.domain.item.Item;
 import com.example.market.domain.item.ItemStatus;
 import com.example.market.domain.user.User;
@@ -312,6 +313,50 @@ class ItemServiceTest extends IntegrationTestSupport {
 
         // when // then
         assertThatThrownBy(() -> itemService.deleteItem(item.getId(), anotherUser.getId()))
+                .isInstanceOf(MarketAppException.class)
+                .hasMessage("작성자 정보가 일치하지 않습니다.");
+    }
+
+    @DisplayName("등록된 아이템 판매 상태를 수정한다.")
+    @Test
+    void updateItemStatus() {
+        // given
+        User buyer = createUser();
+        userRepository.save(buyer);
+
+        Item item = createItem(buyer, 10_000, "제목", "설명", SALE);
+        itemRepository.save(item);
+
+        ItemStatusUpdateRequest request = ItemStatusUpdateRequest.builder()
+                .status(SOLD)
+                .build();
+        // when
+        ItemResponse itemResponse = itemService.updateItemStatus(item.getId(), request, buyer.getId());
+
+        // then
+        assertThat(itemResponse.getId()).isNotNull();
+        assertThat(itemResponse)
+                .extracting("status")
+                .isEqualTo(request.getStatus());
+    }
+
+    @DisplayName("등록된 아이템 판매 상태를 수정할 때, 작성자가 다르면 예외가 발생한다.")
+    @Test
+    void updateItemStatusWithNotEqualWriter() {
+        // given
+        User buyer = createUser();
+        User seller = createUser();
+        userRepository.saveAll(List.of(buyer, seller));
+
+        Item item = createItem(buyer, 10_000, "제목", "설명", SALE);
+        itemRepository.save(item);
+
+        ItemStatusUpdateRequest request = ItemStatusUpdateRequest.builder()
+                .status(SOLD)
+                .build();
+
+        // when // then
+        assertThatThrownBy(() -> itemService.updateItemStatus(item.getId(), request, seller.getId()))
                 .isInstanceOf(MarketAppException.class)
                 .hasMessage("작성자 정보가 일치하지 않습니다.");
     }

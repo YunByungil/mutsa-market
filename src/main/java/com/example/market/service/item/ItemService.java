@@ -1,5 +1,6 @@
 package com.example.market.service.item;
 
+import com.example.market.api.controller.item.request.ItemStatusUpdateRequest;
 import com.example.market.domain.item.Item;
 import com.example.market.domain.user.User;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;
@@ -150,4 +151,20 @@ public class ItemService {
         return ItemResponse.of(item);
     }
 
+    @Transactional
+    public ItemResponse updateItemStatus(final Long itemId, final ItemStatusUpdateRequest request, final Long userId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_ITEM, NOT_FOUND_ITEM.getMessage()));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MarketAppException(NOT_FOUND_USER, NOT_FOUND_USER.getMessage()));
+
+        if (!item.getUser().getId().equals(user.getId())) {
+            throw new MarketAppException(INVALID_WRITER, INVALID_WRITER.getMessage());
+        }
+
+        item.updateStatus(request.getStatus());
+
+        return ItemResponse.of(item);
+    }
 }

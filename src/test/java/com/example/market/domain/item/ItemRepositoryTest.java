@@ -60,7 +60,7 @@ class ItemRepositoryTest {
         itemRepository.saveAll(List.of(item1, item2, item3));
 
         // when
-        Page<Item> items = itemRepository.findAllByStatus(forDisplay(), PageRequest.of(0, 5));
+        Page<Item> items = itemRepository.findAllByStatusIn(forDisplay(), PageRequest.of(0, 5));
 
         // then
         assertThat(items).hasSize(2)
