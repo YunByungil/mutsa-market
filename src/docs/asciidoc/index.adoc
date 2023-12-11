@@ -26,3 +26,7 @@ include::api/comment/comment.adoc[]
 == Negotiation API
 include::api/negotiation/negotiation.adoc[]
 
+[[Review-API]]
+== Review API
+include::api/review/review.adoc[]
+
