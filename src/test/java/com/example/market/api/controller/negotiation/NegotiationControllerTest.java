@@ -1,4 +1,4 @@
-package com.example.market.controller.negotiation;
+package com.example.market.api.controller.negotiation;
 
 import com.example.market.ControllerTestSupport;
 import com.example.market.domain.negotiation.NegotiationStatus;
