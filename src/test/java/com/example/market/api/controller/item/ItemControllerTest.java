@@ -1,4 +1,4 @@
-package com.example.market.controller.item;
+package com.example.market.api.controller.item;
 
 import com.example.market.ControllerTestSupport;
 import com.example.market.api.controller.item.request.ItemCreateRequestDto;

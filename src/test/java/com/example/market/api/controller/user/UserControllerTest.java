@@ -1,4 +1,4 @@
-package com.example.market.controller.user;
+package com.example.market.api.controller.user;
 
 import com.example.market.ControllerTestSupport;
 import com.example.market.domain.user.Coordinate;

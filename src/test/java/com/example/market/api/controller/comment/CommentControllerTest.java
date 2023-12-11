@@ -1,4 +1,4 @@
-package com.example.market.controller.comment;
+package com.example.market.api.controller.comment;
 
 import com.example.market.ControllerTestSupport;
 import com.example.market.api.controller.comment.request.CommentCreateRequestDto;
